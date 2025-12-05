@@ -14,6 +14,7 @@ fn test_rkg_header() {
 
     let header: Header = Header::new(&rkg_data);
 
+    // General ghost info
     assert_eq!(header.rkgd(), "RKGD");
     assert_eq!(header.finish_time().minutes(), 1);
     assert_eq!(header.finish_time().seconds(), 3);
@@ -37,7 +38,8 @@ fn test_rkg_header() {
     assert_eq!(header.country_code(), 0xFF);
     assert_eq!(header.state_code(), 0xFF);
     assert_eq!(header.location_code(), 0xFFFF);
-    // TODO: implement Mii data comparison
+
+    // Mii Data
     assert_eq!(header.mii_data().is_girl(), false);
     assert_eq!(header.mii_data().month(), 1);
     assert_eq!(header.mii_data().day(), 1);
@@ -46,50 +48,66 @@ fn test_rkg_header() {
     assert_eq!(header.mii_data().height(), 127);
     assert_eq!(header.mii_data().weight(), 127);
 
-    /*
-    Mii ID: 893EF2FB
-    Console ID: 689EC992
-    Face Shape: 3
-    Skin Tone: 1
-    Face Features: 0
-    Can Mingle? true
-    Source Type: 0
-    Hair Type: 33
-    Hair Color: 2
-    Hair Flipped? false
-    Eyebrow Type: 23
-    Eyebrow Rotation: 5
-    Eyebrow Color: 1
-    Eyebrow Size: 4
-    Eyebrow Vertical: 10
-    Eyebrow Horizontal: 2
-    Eye Type: 5
-    Eye Rotation: 4
-    Eye Vertical: 9
-    Eye Color: 0
-    Eye Size: 6
-    Eye Horizontal: 1
-    Nose Type: 2
-    Nose Size: 0
-    Nose Vertical: 8
-    Mouth Type: 12
-    Mouth Color: 0
-    Mouth Size: 7
-    Mouth Vertical: 6
-    Glasses Type: 0
-    Glasses Color: 0
-    Glasses Size: 4
-    Glasses Vertical: 10
-    Facial Hair Mustache: 0
-    Facial Hair Beard: 0
-    Facial Hair Color: 0
-    Facial Hair Size: 4
-    Facial Hair Vertical: 10
-    Mole Type: false
-    Mole Size: 4
-    Mole Vertical: 20
-    Mole Horizontal: 2
-    Creator Name: "JC"
-    */
+    assert_eq!(header.mii_data().mii_id1(), 0x89);
+    assert_eq!(header.mii_data().mii_id2(), 0x3E);
+    assert_eq!(header.mii_data().mii_id3(), 0xF2);
+    assert_eq!(header.mii_data().mii_id4(), 0xFB);
+    assert_eq!(header.mii_data().system_id0(), 0x68);
+    assert_eq!(header.mii_data().system_id1(), 0x9E);
+    assert_eq!(header.mii_data().system_id2(), 0xC9);
+    assert_eq!(header.mii_data().system_id3(), 0x92);
+
+    assert_eq!(header.mii_data().face_shape(), 3);
+    assert_eq!(header.mii_data().skin_color(), 1);
+    assert_eq!(header.mii_data().facial_feature(), 0);
+
+    assert_eq!(header.mii_data().mingle_off(), true);
+    assert_eq!(header.mii_data().downloaded(), false);
+
+    assert_eq!(header.mii_data().hair_type(), 33);
+    assert_eq!(header.mii_data().hair_color(), 2);
+    assert_eq!(header.mii_data().hair_part_reversed(), false);
+
+    assert_eq!(header.mii_data().eyebrow_type(), 23);
+    assert_eq!(header.mii_data().eyebrow_rotation(), 5);
+    assert_eq!(header.mii_data().eyebrow_color(), 1);
+    assert_eq!(header.mii_data().eyebrow_size(), 4);
+    assert_eq!(header.mii_data().eyebrow_vertical_pos(), 10);
+    assert_eq!(header.mii_data().eyebrow_horizontal_spacing(), 2);
+
+    assert_eq!(header.mii_data().eye_type(), 5);
+    assert_eq!(header.mii_data().eye_rotation(), 4);
+    assert_eq!(header.mii_data().eye_vertical_pos(), 9);
+    assert_eq!(header.mii_data().eye_color(), 0);
+    assert_eq!(header.mii_data().eye_size(), 6);
+    assert_eq!(header.mii_data().eye_horizontal_spacing(), 1);
+
+    assert_eq!(header.mii_data().nose_type(), 2);
+    assert_eq!(header.mii_data().nose_size(), 0);
+    assert_eq!(header.mii_data().nose_vertical_pos(), 8);
+
+    assert_eq!(header.mii_data().lip_type(), 12);
+    assert_eq!(header.mii_data().lip_color(), 0);
+    assert_eq!(header.mii_data().lip_size(), 7);
+    assert_eq!(header.mii_data().lip_vertical_pos(), 6);
+
+    assert_eq!(header.mii_data().glasses_type(), 0);
+    assert_eq!(header.mii_data().glasses_color(), 0);
+    assert_eq!(header.mii_data().glasses_size(), 4);
+    assert_eq!(header.mii_data().glasses_vertical_pos(), 10);
+
+    assert_eq!(header.mii_data().mustache_type(), 0);
+    assert_eq!(header.mii_data().beard_type(), 0);
+    assert_eq!(header.mii_data().facial_hair_color(), 0);
+    assert_eq!(header.mii_data().mustache_size(), 4);
+    assert_eq!(header.mii_data().mustache_vertical_pos(), 10);
+
+    assert_eq!(header.mii_data().has_mole(), false);
+    assert_eq!(header.mii_data().mole_size(), 4);
+    assert_eq!(header.mii_data().mole_vertical_pos(), 20);
+    assert_eq!(header.mii_data().mole_horizontal_pos(), 2);
+
+    assert_eq!(header.mii_data().creator_name(), "JC");
+
     assert_eq!(header.mii_crc16(), 1780);
 }
