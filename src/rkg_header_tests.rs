@@ -48,7 +48,7 @@ mod tests {
         assert_eq!(header.finish_time().minutes(), 1);
         assert_eq!(header.finish_time().seconds(), 3);
         assert_eq!(header.finish_time().milliseconds(), 904);
-        assert_eq!(header.finish_time().string(), "01:03.904");
+        assert_eq!(header.finish_time().to_string(), "01:03.904");
         assert_eq!(header.track_id(), 0x08);
         assert_eq!(header.vehicle_id(), 0x1A);
         assert_eq!(header.character_id(), 0x13);
@@ -61,9 +61,9 @@ mod tests {
         assert_eq!(header.is_automatic_drift(), true);
         assert_eq!(header.decompressed_input_data_length(), 1856);
         assert_eq!(header.lap_count(), 3);
-        assert_eq!(header.lap_split_times()[0].string(), "00:25.540");
-        assert_eq!(header.lap_split_times()[1].string(), "00:19.127");
-        assert_eq!(header.lap_split_times()[2].string(), "00:19.237");
+        assert_eq!(header.lap_split_times()[0].to_string(), "00:25.540");
+        assert_eq!(header.lap_split_times()[1].to_string(), "00:19.127");
+        assert_eq!(header.lap_split_times()[2].to_string(), "00:19.237");
         assert_eq!(header.country_code(), 0xFF);
         assert_eq!(header.state_code(), 0xFF);
         assert_eq!(header.location_code(), 0xFFFF);

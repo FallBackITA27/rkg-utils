@@ -1,10 +1,11 @@
+use std::fmt::Display;
+
 use bitreader::BitReader;
 
 pub struct FinishTime {
     minutes: u8,       // 7 bits, offset 0x00
     seconds: u8,       // 7 bits, offset 0x00.7
     milliseconds: u16, // 10 bits, offset 0x01.6
-    string: String,    // Total time as string
 }
 
 impl FinishTime {
@@ -18,10 +19,6 @@ impl FinishTime {
 
     pub fn milliseconds(&self) -> u16 {
         self.milliseconds
-    }
-
-    pub fn string(&self) -> &str {
-        &self.string
     }
 
     pub fn from_reader(rkg_reader: &mut BitReader<'_>) -> Self {
@@ -42,7 +39,6 @@ impl FinishTime {
             minutes,
             seconds,
             milliseconds,
-            string: format!("{:02}:{:02}.{:03}", minutes, seconds, milliseconds),
         }
     }
 
@@ -51,7 +47,16 @@ impl FinishTime {
             minutes,
             seconds,
             milliseconds,
-            string: format!("{:02}:{:02}.{:03}", minutes, seconds, milliseconds),
         }
+    }
+}
+
+impl Display for FinishTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{:02}:{:02}.{:03}",
+            self.minutes, self.seconds, self.milliseconds
+        )
     }
 }
