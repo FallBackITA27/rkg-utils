@@ -3,7 +3,7 @@ use bitreader::BitReader;
 use crate::header::{
     combo::{Combo, ComboError},
     date::{Date, DateError},
-    finish_time::FinishTime,
+    finish_time::{FinishTime, FinishTimeError},
     mii::Mii,
     slot_id::{SlotId, SlotIdError},
 };
@@ -20,6 +20,8 @@ pub enum HeaderError {
     NotRKGD,
     #[error("BitReader Error: {0}")]
     BitReaderError(#[from] bitreader::BitReaderError),
+    #[error("Finish Time Error: {0}")]
+    FinishTimeError(#[from] FinishTimeError),
     #[error("Slot ID Error: {0}")]
     SlotIdError(#[from] SlotIdError),
     #[error("Combo Error: {0}")]
@@ -60,7 +62,7 @@ impl Header {
             return Err(HeaderError::NotRKGD);
         }
 
-        let finish_time = FinishTime::from(&mut rkg_reader);
+        let finish_time = FinishTime::try_from(&mut rkg_reader)?;
         let slot_id = SlotId::try_from(&mut rkg_reader)?;
 
         let unknown1 = rkg_reader.read_u8(2)?; // Padding
@@ -86,9 +88,9 @@ impl Header {
 
         let lap_count = rkg_reader.read_u8(8)?;
 
-        let mut lap_split_times: Vec<FinishTime> = Vec::new();
+        let mut lap_split_times: Vec<FinishTime> = Vec::with_capacity(8);
         for _ in 1..=9 {
-            lap_split_times.push(FinishTime::from(&mut rkg_reader));
+            lap_split_times.push(FinishTime::try_from(&mut rkg_reader)?);
         }
 
         // Skip garbage RAM data

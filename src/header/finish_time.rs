@@ -1,12 +1,19 @@
 use std::fmt::Display;
 
+#[derive(thiserror::Error, Debug)]
+pub enum FinishTimeError {
+    #[error("BitReader Error: {0}")]
+    BitReaderError(#[from] bitreader::BitReaderError),
+}
+
 pub struct FinishTime {
-    minutes: u8,       // 7 bits, offset 0x00
-    seconds: u8,       // 7 bits, offset 0x00.7
-    milliseconds: u16, // 10 bits, offset 0x01.6
+    minutes: u8,
+    seconds: u8,
+    milliseconds: u16,
 }
 
 impl FinishTime {
+    #[inline(always)]
     pub fn new(minutes: u8, seconds: u8, milliseconds: u16) -> Self {
         Self {
             minutes,
@@ -38,25 +45,14 @@ impl Display for FinishTime {
     }
 }
 
-impl From<&mut bitreader::BitReader<'_>> for FinishTime {
-    fn from(value: &mut bitreader::BitReader<'_>) -> Self {
-        let minutes: u8 = value
-            .read_u8(7)
-            .expect("Failed to read minutes of finish time");
-
-        let seconds: u8 = value
-            .read_u8(7)
-            .expect("Failed to read seconds of finish time");
-
-        let milliseconds: u16 = value
-            .read_u16(10)
-            .expect("Failed to read milliseconds of finish time");
-
-        Self {
-            minutes,
-            seconds,
-            milliseconds,
-        }
+impl TryFrom<&mut bitreader::BitReader<'_>> for FinishTime {
+    type Error = FinishTimeError;
+    fn try_from(value: &mut bitreader::BitReader<'_>) -> Result<Self, Self::Error> {
+        Ok(Self::new(
+            value.read_u8(7)?,
+            value.read_u8(7)?,
+            value.read_u16(10)?,
+        ))
     }
 }
 
