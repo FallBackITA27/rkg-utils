@@ -1,6 +1,6 @@
 use bitreader::BitReader;
 
-use crate::rkg::header::{finish_time::FinishTime, mii::Mii};
+use crate::header::{finish_time::FinishTime, mii::Mii};
 
 pub mod finish_time;
 pub mod mii;
@@ -36,7 +36,7 @@ pub struct Header {
 
 impl Header {
     pub fn new(rkg_data: &[u8]) -> Self {
-        let mut rkg_reader: BitReader<'_> = BitReader::new(&rkg_data);
+        let mut rkg_reader: BitReader<'_> = BitReader::new(rkg_data);
 
         let rkgd: String = get_rkgd(&mut rkg_reader);
         let finish_time: FinishTime = FinishTime::from(&mut rkg_reader);
