@@ -68,6 +68,59 @@ mod tests {
         assert_eq!(header.state_code(), 0xFF);
         assert_eq!(header.location_code(), 0xFFFF);
         // TODO: implement Mii data comparison
+        assert_eq!(header.mii_data().is_girl(), false);
+        assert_eq!(header.mii_data().month(), 1);
+        assert_eq!(header.mii_data().day(), 1);
+        assert_eq!(header.mii_data().favorite_color(), 4);
+        assert_eq!(header.mii_data().name(), "JC");
+        assert_eq!(header.mii_data().height(), 127);
+        assert_eq!(header.mii_data().weight(), 127);
+
+        /*
+        Mii ID: 893EF2FB
+        Console ID: 689EC992
+        Face Shape: 3
+        Skin Tone: 1
+        Face Features: 0
+        Can Mingle? true
+        Source Type: 0
+        Hair Type: 33
+        Hair Color: 2
+        Hair Flipped? false
+        Eyebrow Type: 23
+        Eyebrow Rotation: 5
+        Eyebrow Color: 1
+        Eyebrow Size: 4
+        Eyebrow Vertical: 10
+        Eyebrow Horizontal: 2
+        Eye Type: 5
+        Eye Rotation: 4
+        Eye Vertical: 9
+        Eye Color: 0
+        Eye Size: 6
+        Eye Horizontal: 1
+        Nose Type: 2
+        Nose Size: 0
+        Nose Vertical: 8
+        Mouth Type: 12
+        Mouth Color: 0
+        Mouth Size: 7
+        Mouth Vertical: 6
+        Glasses Type: 0
+        Glasses Color: 0
+        Glasses Size: 4
+        Glasses Vertical: 10
+        Facial Hair Mustache: 0
+        Facial Hair Beard: 0
+        Facial Hair Color: 0
+        Facial Hair Size: 4
+        Facial Hair Vertical: 10
+        Mole Type: false
+        Mole Size: 4
+        Mole Vertical: 20
+        Mole Horizontal: 2
+        Creator Name: "JC"
+        */
         assert_eq!(header.mii_crc16(), 1780);
     }
 }
