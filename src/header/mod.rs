@@ -2,12 +2,14 @@ use bitreader::BitReader;
 
 use crate::header::{
     combo::{Combo, ComboError},
+    date::{Date, DateError},
     finish_time::FinishTime,
     mii::Mii,
     slot_id::{SlotId, SlotIdError},
 };
 
 pub mod combo;
+pub mod date;
 pub mod finish_time;
 pub mod mii;
 pub mod slot_id;
@@ -22,6 +24,8 @@ pub enum HeaderError {
     SlotIdError(#[from] SlotIdError),
     #[error("Combo Error: {0}")]
     ComboError(#[from] ComboError),
+    #[error("Date Error: {0}")]
+    DateError(#[from] DateError),
 }
 
 pub struct Header {
@@ -29,9 +33,7 @@ pub struct Header {
     slot_id: SlotId,
     unknown1: u8,
     combo: Combo,
-    year_set: u16,
-    month_set: u8,
-    day_set: u8,
+    date_set: Date,
     controller_id: u8,
     unknown2: u8,
     is_compressed: bool,
@@ -64,10 +66,8 @@ impl Header {
         let unknown1 = rkg_reader.read_u8(2)?; // Padding
 
         let combo = Combo::try_from(&mut rkg_reader)?;
+        let date_set = Date::try_from(&mut rkg_reader)?;
 
-        let year_set = rkg_reader.read_u16(7)? + 2000;
-        let month_set = rkg_reader.read_u8(4)?;
-        let day_set = rkg_reader.read_u8(5)?;
         let controller_id = rkg_reader.read_u8(4)?;
         let unknown2 = rkg_reader.read_u8(4)?;
 
@@ -114,9 +114,7 @@ impl Header {
             slot_id,
             unknown1,
             combo,
-            year_set,
-            month_set,
-            day_set,
+            date_set,
             controller_id,
             unknown2,
             is_compressed,
@@ -152,16 +150,8 @@ impl Header {
         &self.combo
     }
 
-    pub fn year_set(&self) -> u16 {
-        self.year_set
-    }
-
-    pub fn month_set(&self) -> u8 {
-        self.month_set
-    }
-
-    pub fn day_set(&self) -> u8 {
-        self.day_set
+    pub fn date_set(&self) -> &Date {
+        &self.date_set
     }
 
     pub fn controller_id(&self) -> u8 {

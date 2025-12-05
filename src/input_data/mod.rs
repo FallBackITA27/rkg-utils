@@ -1,3 +1,1 @@
-pub struct InputData {
-    
-}
+pub struct InputData {}
