@@ -89,7 +89,14 @@ impl Mii {
             .expect("Failed to read favorite color");
 
         let is_favorite: bool = mii_reader.read_bool().expect("Failed to read is_favorite");
-        let name: String = get_name(&mut mii_reader);
+        
+        let mut mii_name_chars: [u16; 10] = [0; 10];
+        for c in mii_name_chars.iter_mut() {
+            *c = mii_reader.read_u16(16).expect("Failed to read mii name bytes");
+        }
+
+        let name: String = get_name(&mii_name_chars);
+
         let height: u8 = mii_reader.read_u8(8).expect("Failed to read height");
 
         let weight: u8 = mii_reader
@@ -508,12 +515,12 @@ impl Mii {
     }
 }
 
-fn get_name(mii_reader: &mut BitReader) -> String {
-    let mut name_bytes: [u16; 10] = [0; 10];
-    for index in 0..10 {
-        name_bytes[index] = mii_reader
-            .read_u16(16)
-            .expect("Failed to read Mii/creator name bytes");
+fn get_name(name_chars: &[u16; 10]) -> String {
+    let mut name: String = String::new();
+    for c in name_chars {
+        if *c != '\0' as u16 {
+            name.push(std::char::from_u32(*c as u32).unwrap());
+        }
     }
-    String::from_utf16_lossy(&name_bytes)
+    name
 }
