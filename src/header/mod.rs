@@ -6,7 +6,7 @@ use crate::header::{
     date::{Date, DateError},
     finish_time::{FinishTime, FinishTimeError},
     ghost_type::{GhostType, GhostTypeError},
-    mii::Mii,
+    mii::{Mii, MiiError},
     slot_id::{SlotId, SlotIdError},
 };
 
@@ -38,6 +38,8 @@ pub enum HeaderError {
     ControllerError(#[from] ControllerError),
     #[error("Ghost Type Error: {0}")]
     GhostTypeError(#[from] GhostTypeError),
+    #[error("Mii Error: {0}")]
+    MiiError(#[from] MiiError),
 }
 
 pub struct Header {
@@ -109,13 +111,10 @@ impl Header {
         let location_code = header_reader.read_u16(16)?;
 
         header_reader.skip(32)?;
-        let mii_data = Mii::new(&header_data[0x3C..0x86]).expect("Failed to read Mii");
 
-        // Skip current reader over mii data (Mii constructor uses its own reader)
-        for _ in 1..=74 {
-            header_reader.skip(8)?;
-        }
+        let mii_data = Mii::try_from(&mut header_reader)?;
 
+        // TODO: Use CRC for its intended purpose and error out if wrong OR report mismatch
         let mii_crc16 = header_reader.read_u16(16)?;
 
         Ok(Self {

@@ -1,5 +1,11 @@
 use bitreader::BitReader;
 
+#[derive(thiserror::Error, Debug)]
+pub enum MiiError {
+    #[error("BitReader Error: {0}")]
+    BitReaderError(#[from] bitreader::BitReaderError),
+}
+
 pub struct Mii {
     is_girl: bool,
     month: u8,
@@ -61,164 +67,9 @@ pub struct Mii {
 }
 
 impl Mii {
-    pub fn new(mii_data: &[u8]) -> Result<Self, bitreader::BitReaderError> {
+    pub fn new(mii_data: &[u8]) -> Result<Self, MiiError> {
         let mut mii_reader: BitReader<'_> = BitReader::new(mii_data);
-
-        mii_reader.skip(1)?;
-        let is_girl = mii_reader.read_bool()?;
-        let month = mii_reader.read_u8(4)?;
-        let day = mii_reader.read_u8(5)?;
-
-        let favorite_color = mii_reader.read_u8(4)?;
-
-        let is_favorite = mii_reader.read_bool()?;
-
-        let mut name_chars: [u16; 10] = [0; 10];
-        for c in name_chars.iter_mut() {
-            *c = mii_reader.read_u16(16)?;
-        }
-        let name = get_name(&name_chars);
-
-        let height = mii_reader.read_u8(8)?;
-
-        let weight = mii_reader.read_u8(8)?;
-
-        let mii_id1 = mii_reader.read_u8(8)?;
-        let mii_id2 = mii_reader.read_u8(8)?;
-        let mii_id3 = mii_reader.read_u8(8)?;
-        let mii_id4 = mii_reader.read_u8(8)?;
-        let system_id0 = mii_reader.read_u8(8)?;
-        let system_id1 = mii_reader.read_u8(8)?;
-        let system_id2 = mii_reader.read_u8(8)?;
-        let system_id3 = mii_reader.read_u8(8)?;
-
-        let face_shape = mii_reader.read_u8(3)?;
-        let skin_color = mii_reader.read_u8(3)?;
-        let facial_feature = mii_reader.read_u8(4)?;
-
-        mii_reader.skip(3)?;
-        let mingle_off = mii_reader.read_bool()?;
-        mii_reader.skip(1)?;
-        let downloaded = mii_reader.read_bool()?;
-
-        let hair_type = mii_reader.read_u8(7)?;
-        let hair_color = mii_reader.read_u8(3)?;
-        let hair_part_reversed = mii_reader.read_bool()?;
-
-        mii_reader.skip(5)?;
-
-        let eyebrow_type = mii_reader.read_u8(5)?;
-        mii_reader.skip(1)?;
-        let eyebrow_rotation = mii_reader.read_u8(4)?;
-        mii_reader.skip(6)?;
-        let eyebrow_color = mii_reader.read_u8(3)?;
-        let eyebrow_size = mii_reader.read_u8(4)?;
-        let eyebrow_vertical_pos = mii_reader.read_u8(5)?;
-        let eyebrow_horizontal_spacing = mii_reader.read_u8(4)?;
-
-        let eye_type = mii_reader.read_u8(6)?;
-        mii_reader.skip(2)?;
-        let eye_rotation = mii_reader.read_u8(3)?;
-        let eye_vertical_pos = mii_reader.read_u8(5)?;
-        let eye_color = mii_reader.read_u8(3)?;
-        mii_reader.skip(1)?;
-        let eye_size = mii_reader.read_u8(3)?;
-        let eye_horizontal_spacing = mii_reader.read_u8(4)?;
-        mii_reader.skip(5)?;
-
-        let nose_type = mii_reader.read_u8(4)?;
-        let nose_size = mii_reader.read_u8(4)?;
-        let nose_vertical_pos = mii_reader.read_u8(5)?;
-        mii_reader.skip(3)?;
-
-        let lip_type = mii_reader.read_u8(5)?;
-        let lip_color = mii_reader.read_u8(2)?;
-        let lip_size = mii_reader.read_u8(4)?;
-        let lip_vertical_pos = mii_reader.read_u8(5)?;
-
-        let glasses_type = mii_reader.read_u8(4)?;
-        let glasses_color = mii_reader.read_u8(3)?;
-        mii_reader.skip(1)?;
-        let glasses_size = mii_reader.read_u8(3)?;
-        let glasses_vertical_pos = mii_reader.read_u8(5)?;
-
-        let mustache_type = mii_reader.read_u8(2)?;
-        let beard_type = mii_reader.read_u8(2)?;
-        let facial_hair_color = mii_reader.read_u8(3)?;
-        let mustache_size = mii_reader.read_u8(4)?;
-        let mustache_vertical_pos = mii_reader.read_u8(5)?;
-
-        let has_mole = mii_reader.read_bool()?;
-        let mole_size = mii_reader.read_u8(4)?;
-        let mole_vertical_pos = mii_reader.read_u8(5)?;
-        let mole_horizontal_pos = mii_reader.read_u8(5)?;
-        mii_reader.skip(1)?;
-
-        let mut name_chars: [u16; 10] = [0; 10];
-        for c in name_chars.iter_mut() {
-            *c = mii_reader.read_u16(16)?;
-        }
-        let creator_name: String = get_name(&name_chars);
-
-        Ok(Self {
-            is_girl,
-            month,
-            day,
-            favorite_color,
-            is_favorite,
-            name,
-            height,
-            weight,
-            mii_id1,
-            mii_id2,
-            mii_id3,
-            mii_id4,
-            system_id0,
-            system_id1,
-            system_id2,
-            system_id3,
-            face_shape,
-            skin_color,
-            facial_feature,
-            mingle_off,
-            downloaded,
-            hair_type,
-            hair_color,
-            hair_part_reversed,
-            eyebrow_type,
-            eyebrow_rotation,
-            eyebrow_color,
-            eyebrow_size,
-            eyebrow_vertical_pos,
-            eyebrow_horizontal_spacing,
-            eye_type,
-            eye_rotation,
-            eye_vertical_pos,
-            eye_color,
-            eye_size,
-            eye_horizontal_spacing,
-            nose_type,
-            nose_size,
-            nose_vertical_pos,
-            lip_type,
-            lip_color,
-            lip_size,
-            lip_vertical_pos,
-            glasses_type,
-            glasses_color,
-            glasses_size,
-            glasses_vertical_pos,
-            mustache_type,
-            beard_type,
-            facial_hair_color,
-            mustache_size,
-            mustache_vertical_pos,
-            has_mole,
-            mole_size,
-            mole_vertical_pos,
-            mole_horizontal_pos,
-            creator_name,
-        })
+        TryFrom::try_from(&mut mii_reader)
     }
 
     pub fn is_girl(&self) -> bool {
@@ -458,4 +309,167 @@ fn get_name(name_chars: &[u16; 10]) -> String {
         }
     }
     name
+}
+
+impl TryFrom<&mut bitreader::BitReader<'_>> for Mii {
+    type Error = MiiError;
+    fn try_from(value: &mut bitreader::BitReader) -> Result<Self, Self::Error> {
+        let mii_reader = value;
+
+        mii_reader.skip(1)?;
+        let is_girl = mii_reader.read_bool()?;
+        let month = mii_reader.read_u8(4)?;
+        let day = mii_reader.read_u8(5)?;
+
+        let favorite_color = mii_reader.read_u8(4)?;
+
+        let is_favorite = mii_reader.read_bool()?;
+
+        let mut name_chars: [u16; 10] = [0; 10];
+        for c in name_chars.iter_mut() {
+            *c = mii_reader.read_u16(16)?;
+        }
+        let name = get_name(&name_chars);
+
+        let height = mii_reader.read_u8(8)?;
+
+        let weight = mii_reader.read_u8(8)?;
+
+        let mii_id1 = mii_reader.read_u8(8)?;
+        let mii_id2 = mii_reader.read_u8(8)?;
+        let mii_id3 = mii_reader.read_u8(8)?;
+        let mii_id4 = mii_reader.read_u8(8)?;
+        let system_id0 = mii_reader.read_u8(8)?;
+        let system_id1 = mii_reader.read_u8(8)?;
+        let system_id2 = mii_reader.read_u8(8)?;
+        let system_id3 = mii_reader.read_u8(8)?;
+
+        let face_shape = mii_reader.read_u8(3)?;
+        let skin_color = mii_reader.read_u8(3)?;
+        let facial_feature = mii_reader.read_u8(4)?;
+
+        mii_reader.skip(3)?;
+        let mingle_off = mii_reader.read_bool()?;
+        mii_reader.skip(1)?;
+        let downloaded = mii_reader.read_bool()?;
+
+        let hair_type = mii_reader.read_u8(7)?;
+        let hair_color = mii_reader.read_u8(3)?;
+        let hair_part_reversed = mii_reader.read_bool()?;
+
+        mii_reader.skip(5)?;
+
+        let eyebrow_type = mii_reader.read_u8(5)?;
+        mii_reader.skip(1)?;
+        let eyebrow_rotation = mii_reader.read_u8(4)?;
+        mii_reader.skip(6)?;
+        let eyebrow_color = mii_reader.read_u8(3)?;
+        let eyebrow_size = mii_reader.read_u8(4)?;
+        let eyebrow_vertical_pos = mii_reader.read_u8(5)?;
+        let eyebrow_horizontal_spacing = mii_reader.read_u8(4)?;
+
+        let eye_type = mii_reader.read_u8(6)?;
+        mii_reader.skip(2)?;
+        let eye_rotation = mii_reader.read_u8(3)?;
+        let eye_vertical_pos = mii_reader.read_u8(5)?;
+        let eye_color = mii_reader.read_u8(3)?;
+        mii_reader.skip(1)?;
+        let eye_size = mii_reader.read_u8(3)?;
+        let eye_horizontal_spacing = mii_reader.read_u8(4)?;
+        mii_reader.skip(5)?;
+
+        let nose_type = mii_reader.read_u8(4)?;
+        let nose_size = mii_reader.read_u8(4)?;
+        let nose_vertical_pos = mii_reader.read_u8(5)?;
+        mii_reader.skip(3)?;
+
+        let lip_type = mii_reader.read_u8(5)?;
+        let lip_color = mii_reader.read_u8(2)?;
+        let lip_size = mii_reader.read_u8(4)?;
+        let lip_vertical_pos = mii_reader.read_u8(5)?;
+
+        let glasses_type = mii_reader.read_u8(4)?;
+        let glasses_color = mii_reader.read_u8(3)?;
+        mii_reader.skip(1)?;
+        let glasses_size = mii_reader.read_u8(3)?;
+        let glasses_vertical_pos = mii_reader.read_u8(5)?;
+
+        let mustache_type = mii_reader.read_u8(2)?;
+        let beard_type = mii_reader.read_u8(2)?;
+        let facial_hair_color = mii_reader.read_u8(3)?;
+        let mustache_size = mii_reader.read_u8(4)?;
+        let mustache_vertical_pos = mii_reader.read_u8(5)?;
+
+        let has_mole = mii_reader.read_bool()?;
+        let mole_size = mii_reader.read_u8(4)?;
+        let mole_vertical_pos = mii_reader.read_u8(5)?;
+        let mole_horizontal_pos = mii_reader.read_u8(5)?;
+        mii_reader.skip(1)?;
+
+        let mut name_chars: [u16; 10] = [0; 10];
+        for c in name_chars.iter_mut() {
+            *c = mii_reader.read_u16(16)?;
+        }
+        let creator_name: String = get_name(&name_chars);
+
+        Ok(Self {
+            is_girl,
+            month,
+            day,
+            favorite_color,
+            is_favorite,
+            name,
+            height,
+            weight,
+            mii_id1,
+            mii_id2,
+            mii_id3,
+            mii_id4,
+            system_id0,
+            system_id1,
+            system_id2,
+            system_id3,
+            face_shape,
+            skin_color,
+            facial_feature,
+            mingle_off,
+            downloaded,
+            hair_type,
+            hair_color,
+            hair_part_reversed,
+            eyebrow_type,
+            eyebrow_rotation,
+            eyebrow_color,
+            eyebrow_size,
+            eyebrow_vertical_pos,
+            eyebrow_horizontal_spacing,
+            eye_type,
+            eye_rotation,
+            eye_vertical_pos,
+            eye_color,
+            eye_size,
+            eye_horizontal_spacing,
+            nose_type,
+            nose_size,
+            nose_vertical_pos,
+            lip_type,
+            lip_color,
+            lip_size,
+            lip_vertical_pos,
+            glasses_type,
+            glasses_color,
+            glasses_size,
+            glasses_vertical_pos,
+            mustache_type,
+            beard_type,
+            facial_hair_color,
+            mustache_size,
+            mustache_vertical_pos,
+            has_mole,
+            mole_size,
+            mole_vertical_pos,
+            mole_horizontal_pos,
+            creator_name,
+        })
+    }
 }
