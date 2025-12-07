@@ -15,18 +15,6 @@ pub enum FaceButton {
     Unknown,
 }
 
-impl From<FaceButton> for u8 {
-    fn from(value: FaceButton) -> u8 {
-        match value {
-            FaceButton::Accelerator => 0x01,
-            FaceButton::Brake => 0x02,
-            FaceButton::Item => 0x04,
-            FaceButton::BrakeWhileAcceleratorHeld => 0x08,
-            FaceButton::Unknown => 0xF0,
-        }
-    }
-}
-
 pub fn parse_face_buttons(value: u8) -> Result<Vec<FaceButton>, FaceButtonError> {
     let mut buttons = Vec::new();
     
