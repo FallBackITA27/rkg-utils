@@ -50,7 +50,7 @@ pub enum FaceInputError {
 #[derive(Debug)]
 pub struct FaceInput {
     buttons: Vec<FaceButton>,
-    frame_duration: u8,
+    frame_duration: u32,
 }
 
 impl FaceInput {
@@ -58,8 +58,18 @@ impl FaceInput {
         &self.buttons
     }
 
-    pub fn frame_duration(&self) -> u8 {
+    pub fn frame_duration(&self) -> u32 {
         self.frame_duration
+    }
+
+    pub fn set_frame_duration(&mut self, frame_duration: u32) {
+        self.frame_duration = frame_duration;
+    }
+}
+
+impl PartialEq for FaceInput {
+    fn eq(&self, other: &Self) -> bool {
+        self.buttons == other.buttons
     }
 }
 
@@ -69,7 +79,7 @@ impl TryFrom<u16> for FaceInput {
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         let bytes = value.to_be_bytes();
         let buttons = parse_face_buttons(bytes[0])?;
-        let frame_duration = bytes[1];
+        let frame_duration = bytes[1] as u32;
 
         Ok(Self {
             buttons,

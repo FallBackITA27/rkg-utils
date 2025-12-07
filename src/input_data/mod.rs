@@ -2,13 +2,13 @@
 
 use bitreader::BitReader;
 
-use crate::input_data::face_input::FaceInput;
 use crate::input_data::dpad_input::DPadInput;
+use crate::input_data::face_input::FaceInput;
 use crate::input_data::stick_input::StickInput;
 
-pub mod stick_input;
-pub mod face_input;
 pub mod dpad_input;
+pub mod face_input;
+pub mod stick_input;
 
 #[derive(thiserror::Error, Debug)]
 pub enum InputDataError {
@@ -44,19 +44,39 @@ impl InputData {
         let dpad_input_count = input_reader.read_u16(16)?;
         input_reader.skip(16)?; // padding
 
-        let mut face_inputs: Vec<FaceInput> = Vec::new();
+        let mut face_inputs: Vec<FaceInput> = Vec::with_capacity(face_input_count as usize);
         for _ in 0..face_input_count {
             face_inputs.push(FaceInput::try_from(&mut input_reader)?);
         }
 
-        let mut stick_inputs: Vec<StickInput> = Vec::new();
+        let mut stick_inputs: Vec<StickInput> = Vec::with_capacity(stick_input_count as usize);
         for _ in 0..stick_input_count {
             stick_inputs.push(StickInput::try_from(&mut input_reader)?);
         }
 
-        let mut dpad_inputs: Vec<DPadInput> = Vec::new();
+        let mut dpad_inputs: Vec<DPadInput> = Vec::with_capacity(dpad_input_count as usize);
         for _ in 0..dpad_input_count {
             dpad_inputs.push(DPadInput::try_from(&mut input_reader)?);
+        }
+
+        // Combine adjacent inputs when the same button is held across multiple bytes
+        // (each input byte has a 255-frame limit, so buttons held longer need additional bytes)
+        for index in (0..face_inputs.len() - 1).rev() {
+            if face_inputs[index] == face_inputs[index + 1] {
+                let f1 = face_inputs[index].frame_duration();
+                let f2 = face_inputs[index + 1].frame_duration();
+                face_inputs[index].set_frame_duration(f1 + f2);
+                face_inputs.remove(index + 1);
+            }
+        }
+
+        for index in (0..stick_inputs.len() - 1).rev() {
+            if stick_inputs[index] == stick_inputs[index + 1] {
+                let f1 = stick_inputs[index].frame_duration();
+                let f2 = stick_inputs[index + 1].frame_duration();
+                stick_inputs[index].set_frame_duration(f1 + f2);
+                stick_inputs.remove(index + 1);
+            }
         }
 
         Ok(Self {

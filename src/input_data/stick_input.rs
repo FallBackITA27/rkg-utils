@@ -17,13 +17,23 @@ impl StickInput {
     pub fn x(&self) -> i8 {
         self.x
     }
-    
+
     pub fn y(&self) -> i8 {
         self.y
     }
 
     pub fn frame_duration(&self) -> u8 {
         self.frame_duration
+    }
+
+    pub fn set_frame_duration(&mut self, frame_duration: u8) {
+        self.frame_duration = frame_duration;
+    }
+}
+
+impl PartialEq for StickInput {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
     }
 }
 
@@ -61,4 +71,3 @@ impl TryFrom<&mut bitreader::BitReader<'_>> for StickInput {
         StickInput::try_from(value.read_u16(16)?)
     }
 }
-
