@@ -1,10 +1,13 @@
-use crate::header::{
-    Header,
-    combo::{Character, Vehicle},
-    controller::Controller,
-    date::Date,
-    ghost_type::GhostType,
-    slot_id::SlotId,
+use crate::{
+    header::{
+        Header,
+        combo::{Character, Vehicle},
+        controller::Controller,
+        date::Date,
+        ghost_type::GhostType,
+        slot_id::SlotId,
+    },
+    input_data::InputData,
 };
 use std::io::Read;
 
@@ -105,4 +108,22 @@ fn test_rkg_header() {
     assert_eq!(header.mii_data().creator_name(), "JC");
 
     assert_eq!(header.mii_crc16(), 0x06F4);
+}
+
+#[test]
+fn test_rkg_input_data() {
+    let mut rkg_data: Vec<u8> = Vec::new();
+    std::fs::File::open("./test_ghosts/JC_LC.rkg")
+        .expect("Couldn't find `./test_ghosts/JC_LC.rkg`")
+        .read_to_end(&mut rkg_data)
+        .expect("Couldn't read bytes in file");
+
+    /* In vanilla ghosts, input data always ends 4 bytes before the end of the file,
+     * but with a CTGP ghost the input data would end [CTGP info footer length] bytes
+     * before the end of the file.
+     */
+    let input_data =
+        InputData::new(&rkg_data[0x88..rkg_data.len() - 0x04]).expect("Couldn't read input data");
+
+    // assert_eq!();
 }

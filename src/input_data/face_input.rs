@@ -52,14 +52,14 @@ pub enum FaceInputError {
 }
 pub struct FaceInput {
     button: FaceButton,
-    frame_duration: u8
+    frame_duration: u8,
 }
 
 impl FaceInput {
     pub fn button(&self) -> FaceButton {
         self.button
     }
-    
+
     pub fn frame_duration(&self) -> u8 {
         self.frame_duration
     }
@@ -73,7 +73,7 @@ impl TryFrom<u16> for FaceInput {
         let frame_duration = bytes[1];
         Ok(Self {
             button,
-            frame_duration
+            frame_duration,
         })
     }
 }

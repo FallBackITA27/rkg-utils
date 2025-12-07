@@ -112,7 +112,7 @@ impl Header {
         for index in 0..lap_count {
             lap_split_times[index as usize] = InGameTime::try_from(&mut header_reader)?;
         }
-        
+
         // Skip non-read laps
         header_reader.skip(((9 - lap_count) * 24) as u64)?;
 
