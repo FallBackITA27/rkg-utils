@@ -23,6 +23,7 @@ pub enum InputDataError {
 }
 
 pub struct InputData {
+    // TODO: combine these into a single Vec, define an Input struct capable of holding all pressed buttons and stick state
     face_inputs: Vec<FaceInput>,
     stick_inputs: Vec<StickInput>,
     dpad_inputs: Vec<DPadInput>,
