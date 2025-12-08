@@ -1,5 +1,3 @@
-// https://wiki.tockdom.com/wiki/RKG_(File_Format)#Controller_Input_Data
-
 use bitreader::BitReader;
 
 use crate::input_data::input::Input;
@@ -24,6 +22,8 @@ pub enum InputDataError {
     BitReaderError(#[from] bitreader::BitReaderError),
 }
 
+/// Handles all input data being read
+/// Tockdom wiki: https://wiki.tockdom.com/wiki/RKG_(File_Format)#Controller_Input_Data
 pub struct InputData {
     face_inputs: Vec<FaceInput>,
     stick_inputs: Vec<StickInput>,

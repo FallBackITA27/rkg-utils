@@ -1,5 +1,3 @@
-// https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header
-
 use bitreader::BitReader;
 
 use crate::header::{
@@ -44,6 +42,8 @@ pub enum HeaderError {
     MiiError(#[from] MiiError),
 }
 
+/// All the data in the Header of an RKGD
+/// https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header
 pub struct Header {
     finish_time: InGameTime,
     slot_id: SlotId,
@@ -64,6 +64,7 @@ pub struct Header {
 }
 
 impl Header {
+    /// Reads header from RKGD bytes
     pub fn new(header_data: &[u8]) -> Result<Self, HeaderError> {
         let mut header_reader = BitReader::new(header_data);
 
