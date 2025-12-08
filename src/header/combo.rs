@@ -1,6 +1,4 @@
-// https://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
-// https://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
-
+/// Struct that handles the validity of the Character/Vehicle combo used in the RKG file
 pub struct Combo {
     character: Character,
     vehicle: Vehicle,
@@ -62,6 +60,8 @@ pub trait GetWeightClass {
     fn get_weight_class(&self) -> WeightClass;
 }
 
+/// Enum with all valid characters
+/// Tockdom documentation: https://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Character {
     Mario,
@@ -280,6 +280,8 @@ impl GetWeightClass for Character {
     }
 }
 
+/// Enum with all valid vehicles
+/// https://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Vehicle {
     StandardKartS,

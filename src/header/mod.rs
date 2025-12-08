@@ -1,5 +1,3 @@
-// https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header
-
 use bitreader::BitReader;
 
 use crate::header::{
@@ -48,6 +46,8 @@ pub enum HeaderError {
     IoError(#[from] std::io::Error),
 }
 
+/// All the data in the Header of an RKGD
+/// https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header
 pub struct Header {
     finish_time: InGameTime,
     slot_id: SlotId,
