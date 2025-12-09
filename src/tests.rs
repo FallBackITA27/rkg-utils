@@ -107,8 +107,8 @@ fn test_rkg_header() {
 #[test]
 fn test_rkg_input_data() {
     let mut rkg_data: Vec<u8> = Vec::new();
-    std::fs::File::open("./test_ghosts/JC_LC.rkg")
-        .expect("Couldn't find `./test_ghosts/JC_LC.rkg`")
+    std::fs::File::open("./test_ghosts/JC_LC_Compressed.rkg")
+        .expect("Couldn't find `./test_ghosts/JC_LC_Compressed.rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
 
@@ -118,9 +118,9 @@ fn test_rkg_input_data() {
      * before the end of the file.
      */
     let input_data =
-        InputData::new(&rkg_data[0x88..rkg_data.len() - 0x04]).expect("Couldn't read input data");
+        InputData::new(&rkg_data[0x88..rkg_data.len() - 0xE0]).expect("Couldn't read input data");
 
-    for (index, input) in input_data.inputs().iter().enumerate() {
-        println!("Input {}: {:?}", index, input);
-    }
+    assert_eq!(input_data.face_input_count(), 0x18);
+    assert_eq!(input_data.stick_input_count(), 0x037B);
+    assert_eq!(input_data.dpad_input_count(), 0x09);
 }

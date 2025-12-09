@@ -25,17 +25,24 @@ pub enum InputDataError {
 /// Handles all input data being read
 /// Tockdom wiki: https://wiki.tockdom.com/wiki/RKG_(File_Format)#Controller_Input_Data
 pub struct InputData {
+    face_input_count: u16,
+    stick_input_count: u16,
+    dpad_input_count: u16,
     face_inputs: Vec<FaceInput>,
     stick_inputs: Vec<StickInput>,
     dpad_inputs: Vec<DPadInput>,
 }
 
 impl InputData {
-    // Currently this only has the uncompressed input data structure in mind
     pub fn new(input_data: &[u8]) -> Result<Self, InputDataError> {
-        // TODO: Determine/decompress compressed input data here
+        let input_data = if input_data[4..8] == [0x59, 0x61, 0x7A, 0x31] {
+            // YAZ1 header, decompress
+            yaz1_decompress(&input_data[4..]).unwrap()
+        } else {
+            Vec::from(input_data)
+        };
 
-        let mut input_reader = BitReader::new(input_data);
+        let mut input_reader = BitReader::new(&input_data);
 
         let face_input_count = input_reader.read_u16(16)?;
         let stick_input_count = input_reader.read_u16(16)?;
@@ -78,6 +85,9 @@ impl InputData {
         }
 
         Ok(Self {
+            face_input_count,
+            stick_input_count,
+            dpad_input_count,
             face_inputs,
             stick_inputs,
             dpad_inputs,
@@ -169,4 +179,113 @@ impl InputData {
     pub fn dpad_inputs(&self) -> &[DPadInput] {
         &self.dpad_inputs
     }
+
+    pub fn face_input_count(&self) -> u16 {
+        self.face_input_count
+    }
+
+    pub fn stick_input_count(&self) -> u16 {
+        self.stick_input_count
+    }
+
+    pub fn dpad_input_count(&self) -> u16 {
+        self.dpad_input_count
+    }
+}
+
+/// Decompress YAZ1-compressed input data
+/// Adapted from https://github.com/AtishaRibeiro/InputDisplay/blob/master/InputDisplay/Core/Yaz1dec.cs
+fn yaz1_decompress(data: &[u8]) -> Option<Vec<u8>> {
+    // YAZ1 files start with "Yaz1" magic header
+    if data.len() < 16 || &data[0..4] != b"Yaz1" {
+        return None;
+    }
+
+    let uncompressed_size = u32::from_be_bytes([data[4], data[5], data[6], data[7]]) as usize;
+
+    let mut result = Vec::with_capacity(uncompressed_size);
+
+    let decompressed = decompress_block(
+        data,
+        16, // Start after 16-byte header
+        uncompressed_size,
+    );
+
+    if let Some(mut dec) = decompressed {
+        result.append(&mut dec);
+    }
+
+    if result.len() == uncompressed_size {
+        Some(result)
+    } else {
+        None
+    }
+}
+
+fn decompress_block(src: &[u8], offset: usize, uncompressed_size: usize) -> Option<Vec<u8>> {
+    let mut dst = Vec::with_capacity(uncompressed_size);
+    let mut src_pos = offset;
+
+    let mut valid_bit_count = 0; // number of valid bits left in "code" byte
+    let mut curr_code_byte = 0u8;
+
+    while dst.len() < uncompressed_size {
+        // Read new "code" byte if the current one is used up
+        if valid_bit_count == 0 {
+            if src_pos >= src.len() {
+                return None;
+            }
+            curr_code_byte = src[src_pos];
+            src_pos += 1;
+            valid_bit_count = 8;
+        }
+
+        if (curr_code_byte & 0x80) != 0 {
+            // Straight copy
+            if src_pos >= src.len() {
+                return None;
+            }
+            dst.push(src[src_pos]);
+            src_pos += 1;
+        } else {
+            // RLE part
+            if src_pos + 1 >= src.len() {
+                return None;
+            }
+
+            let byte1 = src[src_pos];
+            src_pos += 1;
+            let byte2 = src[src_pos];
+            src_pos += 1;
+
+            let dist = (((byte1 & 0xF) as usize) << 8) | (byte2 as usize);
+            let copy_source = dst.len().wrapping_sub(dist + 1);
+
+            let mut num_bytes = (byte1 >> 4) as usize;
+            if num_bytes == 0 {
+                if src_pos >= src.len() {
+                    return None;
+                }
+                num_bytes = src[src_pos] as usize + 0x12;
+                src_pos += 1;
+            } else {
+                num_bytes += 2;
+            }
+
+            // Copy run - must handle overlapping copies
+            for i in 0..num_bytes {
+                if copy_source + i >= dst.len() {
+                    return None;
+                }
+                let byte = dst[copy_source + i];
+                dst.push(byte);
+            }
+        }
+
+        // Use next bit from "code" byte
+        curr_code_byte <<= 1;
+        valid_bit_count -= 1;
+    }
+
+    Some(dst)
 }

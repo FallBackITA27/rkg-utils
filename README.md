@@ -1,1 +1,1 @@
-# viewerkg
+# rkg-utils
