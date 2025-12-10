@@ -114,7 +114,8 @@ fn test_rkg_input_data() {
         .expect("Couldn't read bytes in file");
 
     // TODO: Handle CKGD
-    /* In vanilla ghosts, input data always ends 4 bytes before the end of the file,
+    /* 
+     * In vanilla ghosts, input data always ends 4 bytes before the end of the file,
      * but with a CTGP ghost the input data would end [CTGP info footer length] bytes
      * before the end of the file.
      */
