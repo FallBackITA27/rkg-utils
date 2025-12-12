@@ -10,7 +10,6 @@ pub mod input_data;
  * State ID enum
  * Location ID enum
  * Read CTGP pause times
- * Format CTGP RTC time in a struct
  * Handle older CTGP footer versions
  * Create Ghost struct that brings everything together
  * Add CRC validation functions

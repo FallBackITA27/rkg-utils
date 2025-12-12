@@ -1,5 +1,6 @@
 use crate::ctgp_metadata::category::Category;
 use bitreader::BitReader;
+use chrono::{Duration, TimeDelta, prelude::*};
 
 pub mod category;
 
@@ -19,11 +20,11 @@ pub struct CTGPMetadata {
     player_id: u64,
     true_time_subtraction: f32,
     ctgp_version: u32,
-    unknown: [u8; 0x2C],
+    unknown: [u8; 0x20],
     true_lap_time_subtractions: [f32; 7],
-    rtc_race_end: u32,
-    rtc_race_begins: u32,
-    rtc_time_paused: u32,
+    rtc_race_end: DateTime<Utc>,
+    rtc_race_begins: DateTime<Utc>,
+    rtc_time_paused: TimeDelta,
     my_stuff_enabled: bool,
     my_stuff_used: bool,
     usb_gamecube_enabled: bool,
@@ -66,7 +67,7 @@ impl CTGPMetadata {
         let true_time_subtraction = f32::from_bits(metadata_reader.read_u32(32)?);
         let ctgp_version = metadata_reader.read_u32(32)?;
 
-        let mut unknown = [0_u8; 0x2C];
+        let mut unknown = [0_u8; 0x20];
         for byte in &mut unknown {
             *byte = metadata_reader.read_u8(8)?;
         }
@@ -76,9 +77,9 @@ impl CTGPMetadata {
             *time = f32::from_bits(metadata_reader.read_u32(32)?);
         }
 
-        let rtc_race_end = metadata_reader.read_u32(32)?;
-        let rtc_race_begins = metadata_reader.read_u32(32)?;
-        let rtc_time_paused = metadata_reader.read_u32(32)?;
+        let rtc_race_end = datetime_from_timestamp(metadata_reader.read_u64(64)?);
+        let rtc_race_begins = datetime_from_timestamp(metadata_reader.read_u64(64)?);
+        let rtc_time_paused = duration_from_ticks(metadata_reader.read_u64(64)?);
         metadata_reader.skip(4)?; // padding
         let my_stuff_enabled = metadata_reader.read_bool()?;
         let my_stuff_used = metadata_reader.read_bool()?;
@@ -164,15 +165,15 @@ impl CTGPMetadata {
         &self.true_lap_time_subtractions
     }
 
-    pub fn rtc_race_end(&self) -> u32 {
+    pub fn rtc_race_end(&self) -> DateTime<Utc> {
         self.rtc_race_end
     }
 
-    pub fn rtc_race_begins(&self) -> u32 {
+    pub fn rtc_race_begins(&self) -> DateTime<Utc> {
         self.rtc_race_begins
     }
 
-    pub fn rtc_time_paused(&self) -> u32 {
+    pub fn rtc_time_paused(&self) -> TimeDelta {
         self.rtc_time_paused
     }
 
@@ -245,8 +246,22 @@ impl CTGPMetadata {
     }
 }
 
-/*
-RTC Time info:
-Apparently it's 16.45457783830594ns ticks since 2000-01-01 :despair:
-(i need to figure out the epoch)
-*/
+fn datetime_from_timestamp(tick_count: u64) -> DateTime<Utc> {
+    let clock_rate = 60_750_000.0; // 60.75 MHz tick speed
+    let epoch_shift = 946_684_800; // Shifts epoch from 1970-01-01 to 2000-01-01 (which is what the Wii uses)
+    let total_seconds = tick_count as f64 / clock_rate;
+    let total_nanoseconds = (total_seconds * 1_000_000_000.0) as i64;
+
+    let duration = Duration::nanoseconds(total_nanoseconds);
+    let epoch = DateTime::from_timestamp(epoch_shift, 0).unwrap();
+
+    epoch + duration
+}
+
+fn duration_from_ticks(tick_count: u64) -> TimeDelta {
+    let clock_rate = 60_750_000.0; // 60.75 MHz tick speed
+    let total_seconds = tick_count as f64 / clock_rate;
+    let total_milliseconds = (total_seconds * 1_000.0) as i64;
+
+    Duration::milliseconds(total_milliseconds)
+}

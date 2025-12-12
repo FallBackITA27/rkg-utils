@@ -160,4 +160,6 @@ fn test_ctgp_metadata() {
     );
     let shroomstrat: [u8; 8] = [3, 0, 0, 0, 0, 0, 0, 0];
     assert_eq!(ctgp_metadata.shroomstrat(), &shroomstrat);
+    println!("Date set: {}", ctgp_metadata.rtc_race_end());
+    println!("Pause time: {}ms", ctgp_metadata.rtc_time_paused().num_milliseconds());
 }
