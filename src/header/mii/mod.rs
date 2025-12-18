@@ -94,9 +94,13 @@ impl Mii {
         let height = mii_data[0x16] & 0x7F;
         let weight = mii_data[0x17] & 0x7F;
 
-        let mii_id = ByteHandler::try_from(&mii_data[0x18..=0x1B]).unwrap().copy_dword();
-        let system_id = ByteHandler::try_from(&mii_data[0x1C..=0x1F]).unwrap().copy_dword();
-        
+        let mii_id = ByteHandler::try_from(&mii_data[0x18..=0x1B])
+            .unwrap()
+            .copy_dword();
+        let system_id = ByteHandler::try_from(&mii_data[0x1C..=0x1F])
+            .unwrap()
+            .copy_dword();
+
         let face_shape = mii_data[0x20] >> 5;
         let skin_color = (mii_data[0x20] >> 2) & 0x03;
         let mut facial_feature = ByteHandler::try_from(&mii_data[0x20..=0x21]).unwrap();
@@ -107,7 +111,7 @@ impl Mii {
         let mingle_off = bools.read_bool(2);
         let downloaded = bools.read_bool(0);
 
-        let mut hair_data = ByteHandler::try_from(&mii_data[0x22..=0x23]).unwrap();
+        let hair_data = ByteHandler::try_from(&mii_data[0x22..=0x23]).unwrap();
         let hair_type = hair_data.copy_byte(2) >> 1;
         let hair_part_reversed = hair_data.read_bool(4);
         let hair_color = hair_data.copy_byte(3) >> 6;

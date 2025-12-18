@@ -77,7 +77,7 @@ impl FromByteHandler for InGameTime {
         // 1. 0b00001010
         // 2. 0b11101111
         // 3. 0b11100111
-        
+
         Ok(Self {
             minutes: handler.copy_byte(1) >> 1,
             seconds: handler.copy_byte(2) >> 2 & 0x7F,

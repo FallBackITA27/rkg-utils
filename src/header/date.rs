@@ -67,7 +67,7 @@ impl FromByteHandler for Date {
         let year = u16::from(handler.copy_byte(2) & 0x7F) + 2000;
         handler.shift_right(4);
         let month = handler.copy_byte(3) & 0x0F;
-        
+
         Self::new(year, month, day)
     }
 }

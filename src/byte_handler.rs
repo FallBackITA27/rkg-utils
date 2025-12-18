@@ -74,25 +74,33 @@ impl From<[u8; 4]> for ByteHandler {
 
 impl From<[u8; 3]> for ByteHandler {
     fn from(value: [u8; 3]) -> Self {
-        ByteHandler { bytes: [0, value[0], value[1], value[2]] }
+        ByteHandler {
+            bytes: [0, value[0], value[1], value[2]],
+        }
     }
 }
 
 impl From<[u8; 2]> for ByteHandler {
     fn from(value: [u8; 2]) -> Self {
-        ByteHandler { bytes: [0, 0, value[0], value[1]] }
+        ByteHandler {
+            bytes: [0, 0, value[0], value[1]],
+        }
     }
 }
 
 impl From<u8> for ByteHandler {
     fn from(value: u8) -> Self {
-        ByteHandler { bytes: [0, 0, 0, value] }
+        ByteHandler {
+            bytes: [0, 0, 0, value],
+        }
     }
 }
 
 impl From<u32> for ByteHandler {
     fn from(value: u32) -> Self {
-        ByteHandler { bytes: value.to_be_bytes() }
+        ByteHandler {
+            bytes: value.to_be_bytes(),
+        }
     }
 }
 
@@ -116,7 +124,7 @@ impl From<u16> for ByteHandler {
 
 impl TryFrom<&[u8]> for ByteHandler {
     type Error = ();
-    
+
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         match value.len() {
             0 => Ok(ByteHandler::from(0u32)),
@@ -131,7 +139,7 @@ impl TryFrom<&[u8]> for ByteHandler {
 
 impl TryFrom<&[u16]> for ByteHandler {
     type Error = ();
-    
+
     fn try_from(value: &[u16]) -> Result<Self, Self::Error> {
         match value.len() {
             0 => Ok(ByteHandler::from(0u32)),
