@@ -64,7 +64,8 @@ pub struct Header {
     country_code: u8,
     state_code: u8,
     location_code: u16,
-    mii_data: Mii,
+    mii_bytes: [u8; 0x4A],
+    mii: Mii,
     mii_crc16: u16,
 }
 
@@ -110,12 +111,15 @@ impl Header {
         let state_code = codes.copy_bytes()[1];
         let location_code = codes.copy_words()[1];
 
-        let mii_data = Mii::new(&header_data[0x3C..0x3C + 0x4A])?;
+        let mut mii_bytes = [0_u8; 0x4A];
+        for (index, byte) in header_data[0x3C..0x3C + 0x4A].iter().enumerate() {
+            mii_bytes[index] = *byte;
+        }
+        let mii = Mii::new(mii_bytes)?;
 
-        // TODO: Use CRC for its intended purpose and error out if wrong OR report mismatch
         let mii_crc16 = ByteHandler::try_from(&header_data[0x86..=0x87])
             .unwrap()
-            .copy_words()[1];
+            .copy_word(1);
 
         Ok(Self {
             finish_time,
@@ -132,9 +136,20 @@ impl Header {
             country_code,
             state_code,
             location_code,
-            mii_data,
+            mii_bytes,
+            mii,
             mii_crc16,
         })
+    }
+    
+    /// Returns true if Mii CRC16 is correct (i.e. Mii data not illegally tampered with)
+    pub fn verify_mii_crc16(&self) -> bool {
+        crc16(&self.mii_bytes) == self.mii_crc16()
+    }
+    
+    /// Recalculates and updates Mii CRC16
+    pub fn fix_mii_crc16(&mut self) {
+        self.mii_crc16 = crc16(&self.mii_bytes);
     }
 
     pub fn finish_time(&self) -> &InGameTime {
@@ -193,11 +208,29 @@ impl Header {
         self.location_code
     }
 
-    pub fn mii_data(&self) -> &Mii {
-        &self.mii_data
+    pub fn mii(&self) -> &Mii {
+        &self.mii
     }
 
     pub fn mii_crc16(&self) -> u16 {
         self.mii_crc16
     }
+}
+
+fn crc16(value: &[u8]) -> u16 {
+    let mut crc: u16 = 0x0000; // Initial value for XModem variant
+    let polynomial: u16 = 0x1021; // Standard CCITT polynomial
+
+    for &byte in value.iter() {
+        crc ^= (byte as u16) << 8; // XOR current byte with the high byte of CRC
+
+        for _ in 0..8 {
+            if crc & 0x8000 != 0 {
+                crc = (crc << 1) ^ polynomial;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    crc
 }
