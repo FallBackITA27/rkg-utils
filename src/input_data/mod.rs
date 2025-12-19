@@ -1,5 +1,3 @@
-use bitreader::BitReader;
-
 use crate::input_data::dpad_input::{DPadButton, DPadInput};
 use crate::input_data::face_input::FaceInput;
 use crate::input_data::input::Input;

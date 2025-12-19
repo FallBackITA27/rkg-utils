@@ -14,7 +14,7 @@ pub enum FaceButton {
 
 pub fn parse_face_buttons(value: u8) -> Result<Vec<FaceButton>, FaceButtonError> {
     let mut buttons = Vec::new();
-    
+
     if value & 0x01 != 0 {
         buttons.push(FaceButton::Accelerator);
     }

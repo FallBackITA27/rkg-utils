@@ -39,7 +39,6 @@ impl TryFrom<&[u8]> for StickInput {
     type Error = StickInputError;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-
         let x = (value[0] & 0xF0) >> 4;
         let y = value[0] & 0x0F;
 
