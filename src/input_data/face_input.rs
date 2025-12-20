@@ -37,7 +37,7 @@ pub fn parse_face_buttons(value: u8) -> Result<Vec<FaceButton>, FaceButtonError>
     if value & 0xF0 != 0 && value & 0x40 == 0 {
         buttons.push(FaceButton::Unknown);
     }
-    
+
     if value & 0x08 != 0 && value & 0x02 == 0 {
         // If drift "button" (flag) is pressed but brake button is not (illegal input)
         return Err(FaceButtonError::IllegalDriftInput);

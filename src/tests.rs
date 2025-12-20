@@ -209,7 +209,20 @@ fn illegal_drift_input_test() {
         .expect("Couldn't find `./test_ghosts/illegal_drift_inputs.rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
-    
+
+    // This line should always fail
+    let _input_data = InputData::new(&rkg_data).expect("Failed to read input data");
+}
+
+#[test]
+#[should_panic(expected = "FaceInputError(InvalidButton(IllegalDriftInput))")]
+fn illegal_brake_input_test() {
+    let mut rkg_data: Vec<u8> = Vec::new();
+    std::fs::File::open("./test_ghosts/illegal_brake_input.rkg")
+        .expect("Couldn't find `./test_ghosts/illegal_brake_input.rkg`")
+        .read_to_end(&mut rkg_data)
+        .expect("Couldn't read bytes in file");
+
     // This line should always fail
     let _input_data = InputData::new(&rkg_data).expect("Failed to read input data");
 }

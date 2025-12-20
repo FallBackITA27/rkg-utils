@@ -1,5 +1,5 @@
 use crate::input_data::dpad_input::{DPadButton, DPadInput};
-use crate::input_data::face_input::FaceInput;
+use crate::input_data::face_input::{FaceButton, FaceInput};
 use crate::input_data::input::Input;
 use crate::input_data::stick_input::StickInput;
 
@@ -16,8 +16,8 @@ pub enum InputDataError {
     DPadInputError(#[from] dpad_input::DPadInputError),
     #[error("Stick Input Error: {0}")]
     StickInputError(#[from] stick_input::StickInputError),
-    #[error("BitReader Error: {0}")]
-    BitReaderError(#[from] bitreader::BitReaderError),
+    #[error("Illegal Brake Input")]
+    IllegalBrakeInput,
 }
 
 /// Handles all input data being read
