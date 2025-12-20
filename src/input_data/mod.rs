@@ -16,8 +16,6 @@ pub enum InputDataError {
     DPadInputError(#[from] dpad_input::DPadInputError),
     #[error("Stick Input Error: {0}")]
     StickInputError(#[from] stick_input::StickInputError),
-    #[error("Illegal Brake Input")]
-    IllegalBrakeInput,
 }
 
 /// Handles all input data being read
