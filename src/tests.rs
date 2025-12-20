@@ -194,21 +194,6 @@ fn test_ctgp_pause_vs_vanilla_input_timing() {
     let vanilla_inputs = InputData::new(&vanilla_rkg_data[0x88..vanilla_rkg_data.len() - 0x04])
         .expect("Failed to read inputs from vanilla ghost");
 
-    /*
-    assert_eq!(
-        pause_inputs.face_input_count(),
-        vanilla_inputs.face_input_count()
-    );
-    assert_eq!(
-        pause_inputs.stick_input_count(),
-        vanilla_inputs.stick_input_count()
-    );
-    assert_eq!(
-        pause_inputs.dpad_input_count(),
-        vanilla_inputs.dpad_input_count()
-    );
-    */
-
     assert_eq!(pause_inputs.face_inputs(), vanilla_inputs.face_inputs());
     assert_eq!(pause_inputs.stick_inputs(), vanilla_inputs.stick_inputs());
     assert_eq!(pause_inputs.dpad_inputs(), pause_inputs.dpad_inputs());
@@ -217,17 +202,14 @@ fn test_ctgp_pause_vs_vanilla_input_timing() {
 }
 
 #[test]
-fn print_inputs_test() {
+#[should_panic(expected = "FaceInputError(InvalidButton(IllegalDriftInput))")]
+fn illegal_drift_input_test() {
     let mut rkg_data: Vec<u8> = Vec::new();
-    std::fs::File::open("./test_ghosts/drift_button_test.rkg")
-        .expect("Couldn't find `./test_ghosts/drift_button_test.rkg`")
+    std::fs::File::open("./test_ghosts/illegal_drift_inputs.rkg")
+        .expect("Couldn't find `./test_ghosts/illegal_drift_inputs.rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
-
-    println!(
-        "{:#?}",
-        InputData::new(&rkg_data[0x88..rkg_data.len() - 0x04])
-            .expect("Failed to read input data")
-            .inputs()
-    );
+    
+    // This line should always fail
+    let _input_data = InputData::new(&rkg_data).expect("Failed to read input data");
 }
