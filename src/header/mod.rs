@@ -1,13 +1,15 @@
-use bitreader::BitReader;
-
-use crate::header::{
-    combo::{Combo, ComboError},
-    controller::{Controller, ControllerError},
-    date::{Date, DateError},
-    ghost_type::{GhostType, GhostTypeError},
-    in_game_time::{InGameTime, InGameTimeError},
-    mii::{Mii, MiiError},
-    slot_id::{SlotId, SlotIdError},
+use crate::{
+    byte_handler::{ByteHandler, FromByteHandler},
+    header::{
+        combo::{Combo, ComboError},
+        controller::{Controller, ControllerError},
+        date::{Date, DateError},
+        ghost_type::{GhostType, GhostTypeError},
+        in_game_time::{InGameTime, InGameTimeError},
+        location::country::{Country, CountryError},
+        mii::{Mii, MiiError},
+        slot_id::{SlotId, SlotIdError},
+    },
 };
 
 use std::io::Read;
@@ -17,6 +19,7 @@ pub mod controller;
 pub mod date;
 pub mod ghost_type;
 pub mod in_game_time;
+pub mod location;
 pub mod mii;
 pub mod slot_id;
 
@@ -26,8 +29,6 @@ pub enum HeaderError {
     NotRKGD,
     #[error("Data passed is not correct size (0x88)")]
     NotCorrectSize,
-    #[error("BitReader Error: {0}")]
-    BitReaderError(#[from] bitreader::BitReaderError),
     #[error("In Game Time Error: {0}")]
     InGameTimeError(#[from] InGameTimeError),
     #[error("Slot ID Error: {0}")]
@@ -44,6 +45,8 @@ pub enum HeaderError {
     MiiError(#[from] MiiError),
     #[error("Io Error: {0}")]
     IoError(#[from] std::io::Error),
+    #[error("Country Error: {0}")]
+    CountryError(#[from] CountryError),
 }
 
 /// All the data in the Header of an RKGD
@@ -59,11 +62,12 @@ pub struct Header {
     is_automatic_drift: bool,
     decompressed_input_data_length: u16,
     lap_count: u8,
-    lap_split_times: [InGameTime; 8],
-    country_code: u8,
-    state_code: u8,
+    lap_split_times: [InGameTime; 10],
+    country: Country,
+    subregion: u8,
     location_code: u16,
-    mii_data: Mii,
+    mii_bytes: [u8; 0x4A],
+    mii: Mii,
     mii_crc16: u16,
 }
 
@@ -75,72 +79,49 @@ impl Header {
         Self::new(&rkg_data)
     }
 
+    /// Reads header from slice
     pub fn new(header_data: &[u8]) -> Result<Self, HeaderError> {
-        let mut header_reader = BitReader::new(header_data);
-
-        if header_reader.read_u32(32)? != 0x524B4744 {
-            return Err(HeaderError::NotRKGD);
-        } else if header_data.len() != 0x88 {
+        if header_data.len() != 0x88 {
             return Err(HeaderError::NotCorrectSize);
         }
-
-        let finish_time = InGameTime::try_from(&mut header_reader)?;
-        let slot_id = SlotId::try_from(&mut header_reader)?;
-
-        header_reader.skip(2)?; // Padding
-
-        let combo = Combo::try_from(&mut header_reader)?;
-        let date_set = Date::try_from(&mut header_reader)?;
-        let controller = Controller::try_from(&mut header_reader)?;
-
-        header_reader.skip(4)?;
-
-        let is_compressed = header_reader
-            .read_bool()
-            .expect("Failed to read is_compressed");
-
-        header_reader.skip(2)?;
-        let ghost_type = GhostType::try_from(&mut header_reader)?;
-
-        let is_automatic_drift = header_reader.read_bool()?;
-
-        header_reader.skip(1)?;
-
-        let decompressed_input_data_length = header_reader.read_u16(16)?;
-
-        let lap_count = header_reader.read_u8(8)?;
-
-        let mut lap_split_times: [InGameTime; 8] = [
-            Default::default(),
-            Default::default(),
-            Default::default(),
-            Default::default(),
-            Default::default(),
-            Default::default(),
-            Default::default(),
-            Default::default(),
-        ];
-        for index in 0..lap_count {
-            lap_split_times[index as usize] = InGameTime::try_from(&mut header_reader)?;
+        if header_data[0..4] != [0x52, 0x4B, 0x47, 0x44] {
+            return Err(HeaderError::NotRKGD);
         }
 
-        // Skip non-read laps
-        header_reader.skip(((9 - lap_count) * 24) as u64)?;
+        let finish_time = InGameTime::from_byte_handler(&header_data[4..7])?;
+        let slot_id = SlotId::from_byte_handler(header_data[7])?;
+        let combo = Combo::from_byte_handler(&header_data[0x08..0x0A])?;
+        let date_set = Date::from_byte_handler(&header_data[0x09..=0x0B])?;
+        let controller = Controller::from_byte_handler(header_data[0x0B])?;
+        let is_compressed = ByteHandler::from(header_data[0x0C]).read_bool(3);
+        let ghost_type = GhostType::from_byte_handler(&header_data[0x0C..=0x0D])?;
+        let is_automatic_drift = ByteHandler::from(header_data[0x0D]).read_bool(1);
+        let decompressed_input_data_length = ByteHandler::try_from(&header_data[0x0E..=0x0F])
+            .unwrap()
+            .copy_word(1);
 
-        // Skip garbage RAM data
-        header_reader.skip(64)?;
+        let lap_count = header_data[0x10];
+        let mut lap_split_times: [InGameTime; 10] = [Default::default(); 10];
+        for index in 0..lap_count {
+            let start = (0x11 + index * 3) as usize;
+            lap_split_times[index as usize] =
+                InGameTime::from_byte_handler(&header_data[start..start + 3])?;
+        }
 
-        let country_code = header_reader.read_u8(8)?;
-        let state_code = header_reader.read_u8(8)?;
+        let codes = ByteHandler::try_from(&header_data[0x34..=0x37]).unwrap();
+        let country = Country::try_from(codes.copy_byte(0))?;
+        let subregion = codes.copy_byte(1);
+        let location_code = codes.copy_word(1);
 
-        let location_code = header_reader.read_u16(16)?;
+        let mut mii_bytes = [0_u8; 0x4A];
+        for (index, byte) in header_data[0x3C..0x3C + 0x4A].iter().enumerate() {
+            mii_bytes[index] = *byte;
+        }
+        let mii = Mii::new(mii_bytes)?;
 
-        header_reader.skip(32)?;
-
-        let mii_data = Mii::try_from(&mut header_reader)?;
-
-        // TODO: Use CRC for its intended purpose and error out if wrong OR report mismatch
-        let mii_crc16 = header_reader.read_u16(16)?;
+        let mii_crc16 = ByteHandler::try_from(&header_data[0x86..=0x87])
+            .unwrap()
+            .copy_word(1);
 
         Ok(Self {
             finish_time,
@@ -154,32 +135,63 @@ impl Header {
             decompressed_input_data_length,
             lap_count,
             lap_split_times,
-            country_code,
-            state_code,
+            country,
+            subregion,
             location_code,
-            mii_data,
+            mii_bytes,
+            mii,
             mii_crc16,
         })
+    }
+
+    /// Returns true if Mii CRC16 is correct (i.e. Mii data not illegally tampered with)
+    pub fn verify_mii_crc16(&self) -> bool {
+        crc16(&self.mii_bytes) == self.mii_crc16()
+    }
+
+    /// Recalculates and updates Mii CRC16
+    pub fn fix_mii_crc16(&mut self) {
+        self.mii_crc16 = crc16(&self.mii_bytes);
     }
 
     pub fn finish_time(&self) -> &InGameTime {
         &self.finish_time
     }
 
+    pub fn set_finish_time(&mut self, finish_time: InGameTime) {
+        self.finish_time = finish_time;
+    }
+
     pub fn slot_id(&self) -> SlotId {
         self.slot_id
+    }
+
+    pub fn set_slot_id(&mut self, slot_id: SlotId) {
+        self.slot_id = slot_id;
     }
 
     pub fn combo(&self) -> &Combo {
         &self.combo
     }
 
+    pub fn set_combo(&mut self, combo: Combo) {
+        self.combo = combo;
+    }
+
     pub fn date_set(&self) -> &Date {
         &self.date_set
     }
 
+    pub fn set_date_set(&mut self, date_set: Date) {
+        self.date_set = date_set;
+    }
+
     pub fn controller(&self) -> Controller {
         self.controller
+    }
+
+    pub fn set_controller(&mut self, controller: Controller) {
+        self.controller = controller;
     }
 
     pub fn is_compressed(&self) -> bool {
@@ -188,6 +200,10 @@ impl Header {
 
     pub fn ghost_type(&self) -> GhostType {
         self.ghost_type
+    }
+
+    pub fn set_ghost_type(&mut self, ghost_type: GhostType) {
+        self.ghost_type = ghost_type;
     }
 
     pub fn is_automatic_drift(&self) -> bool {
@@ -203,26 +219,48 @@ impl Header {
     }
 
     pub fn lap_split_times(&self) -> &[InGameTime] {
-        &self.lap_split_times
+        &self.lap_split_times[0..self.lap_count as usize]
     }
 
-    pub fn country_code(&self) -> u8 {
-        self.country_code
+    pub fn set_lap_split_times(&mut self, lap_split_times: [InGameTime; 10]) {
+        self.lap_split_times = lap_split_times;
     }
 
-    pub fn state_code(&self) -> u8 {
-        self.state_code
+    pub fn country(&self) -> Country {
+        self.country
+    }
+
+    pub fn subregion(&self) -> u8 {
+        self.subregion
     }
 
     pub fn location_code(&self) -> u16 {
         self.location_code
     }
 
-    pub fn mii_data(&self) -> &Mii {
-        &self.mii_data
+    pub fn mii(&self) -> &Mii {
+        &self.mii
     }
 
     pub fn mii_crc16(&self) -> u16 {
         self.mii_crc16
     }
+}
+
+fn crc16(value: &[u8]) -> u16 {
+    let mut crc: u16 = 0x0000; // Initial value for XModem variant
+    let polynomial: u16 = 0x1021; // Standard CCITT polynomial
+
+    for &byte in value.iter() {
+        crc ^= (byte as u16) << 8; // XOR current byte with the high byte of CRC
+
+        for _ in 0..8 {
+            if crc & 0x8000 != 0 {
+                crc = (crc << 1) ^ polynomial;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    crc
 }

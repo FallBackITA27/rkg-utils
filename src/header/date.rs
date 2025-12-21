@@ -1,3 +1,5 @@
+use crate::byte_handler::FromByteHandler;
+
 #[derive(thiserror::Error, Debug)]
 pub enum DateError {
     #[error("Year is invalid")]
@@ -6,8 +8,6 @@ pub enum DateError {
     MonthInvalid,
     #[error("Day is invalid")]
     DayInvalid,
-    #[error("BitReader Error: {0}")]
-    BitReaderError(#[from] bitreader::BitReaderError),
 }
 
 #[derive(Debug)]
@@ -48,14 +48,25 @@ impl Date {
     }
 }
 
-impl TryFrom<&mut bitreader::BitReader<'_>> for Date {
-    type Error = DateError;
-    fn try_from(value: &mut bitreader::BitReader<'_>) -> Result<Self, Self::Error> {
-        Self::new(
-            value.read_u16(7)? + 2000,
-            value.read_u8(4)?,
-            value.read_u8(5)?,
-        )
+impl FromByteHandler for Date {
+    type Err = DateError;
+    /// Expects Header 0x09..=0x0B
+    fn from_byte_handler<T: TryInto<crate::byte_handler::ByteHandler>>(
+        handler: T,
+    ) -> Result<Self, Self::Err> {
+        let mut handler = handler
+            .try_into()
+            .map_err(|_| ())
+            .expect("TODO: handle this");
+
+        handler.shift_right(4);
+        let day = handler.copy_byte(3) & 0x1F;
+        handler.shift_right(1);
+        let year = u16::from(handler.copy_byte(2) & 0x7F) + 2000;
+        handler.shift_right(4);
+        let month = handler.copy_byte(3) & 0x0F;
+
+        Self::new(year, month, day)
     }
 }
 

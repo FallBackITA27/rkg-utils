@@ -1,5 +1,3 @@
-use bitreader::BitReader;
-
 use crate::input_data::dpad_input::{DPadButton, DPadInput};
 use crate::input_data::face_input::FaceInput;
 use crate::input_data::input::Input;
@@ -18,8 +16,6 @@ pub enum InputDataError {
     DPadInputError(#[from] dpad_input::DPadInputError),
     #[error("Stick Input Error: {0}")]
     StickInputError(#[from] stick_input::StickInputError),
-    #[error("BitReader Error: {0}")]
-    BitReaderError(#[from] bitreader::BitReaderError),
 }
 
 /// Handles all input data being read
@@ -42,26 +38,36 @@ impl InputData {
             Vec::from(input_data)
         };
 
-        let mut input_reader = BitReader::new(&input_data);
+        let face_input_count = u16::from_be_bytes([input_data[0], input_data[1]]);
+        let stick_input_count = u16::from_be_bytes([input_data[2], input_data[3]]);
+        let dpad_input_count = u16::from_be_bytes([input_data[4], input_data[5]]);
+        // bytes 6-7: padding
 
-        let face_input_count = input_reader.read_u16(16)?;
-        let stick_input_count = input_reader.read_u16(16)?;
-        let dpad_input_count = input_reader.read_u16(16)?;
-        input_reader.skip(16)?; // padding
-
+        let mut current_byte = 8;
         let mut face_inputs: Vec<FaceInput> = Vec::with_capacity(face_input_count as usize);
-        for _ in 0..face_input_count {
-            face_inputs.push(FaceInput::try_from(&mut input_reader)?);
+        while current_byte < 8 + face_input_count * 2 {
+            let idx = current_byte as usize;
+            let input = &input_data[idx..idx + 2];
+            face_inputs.push(FaceInput::try_from(input)?);
+            current_byte += 2;
         }
 
+        current_byte = 8 + face_input_count * 2;
         let mut stick_inputs: Vec<StickInput> = Vec::with_capacity(stick_input_count as usize);
-        for _ in 0..stick_input_count {
-            stick_inputs.push(StickInput::try_from(&mut input_reader)?);
+        while current_byte < 8 + (face_input_count + stick_input_count) * 2 {
+            let idx = current_byte as usize;
+            let input = &input_data[idx..idx + 2];
+            stick_inputs.push(StickInput::try_from(input)?);
+            current_byte += 2;
         }
 
+        current_byte = 8 + (face_input_count + stick_input_count) * 2;
         let mut dpad_inputs: Vec<DPadInput> = Vec::with_capacity(dpad_input_count as usize);
-        for _ in 0..dpad_input_count {
-            dpad_inputs.push(DPadInput::try_from(&mut input_reader)?);
+        while current_byte < 8 + (face_input_count + stick_input_count + dpad_input_count) * 2 {
+            let idx = current_byte as usize;
+            let input = &input_data[idx..idx + 2];
+            dpad_inputs.push(DPadInput::try_from(input)?);
+            current_byte += 2;
         }
 
         // Combine adjacent inputs when the same button is held across multiple bytes
@@ -151,7 +157,9 @@ impl InputData {
             stick_offset += duration;
             dpad_offset += duration;
 
-            if face.is_some() && face_offset >= face.unwrap().frame_duration() {
+            if let Some(face) = face
+                && face_offset >= face.frame_duration()
+            {
                 face_idx += 1;
                 face_offset = 0;
             }
@@ -195,7 +203,7 @@ impl InputData {
 
 /// Decompress YAZ1-compressed input data
 /// Adapted from https://github.com/AtishaRibeiro/InputDisplay/blob/master/InputDisplay/Core/Yaz1dec.cs
-fn yaz1_decompress(data: &[u8]) -> Option<Vec<u8>> {
+pub fn yaz1_decompress(data: &[u8]) -> Option<Vec<u8>> {
     // YAZ1 files start with "Yaz1" magic header
     if data.len() < 16 || &data[0..4] != b"Yaz1" {
         return None;
