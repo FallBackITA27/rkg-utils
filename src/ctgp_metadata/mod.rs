@@ -78,7 +78,7 @@ pub struct CTGPMetadata {
 }
 
 impl CTGPMetadata {
-    /// Expects rkg data from [0x88..]
+    /// Expects full rkg data
     pub fn new(data: &[u8]) -> Result<Self, CTGPMetadataError> {
         if data[data.len() - 0x08..data.len() - 0x04] != [0x43, 0x4B, 0x47, 0x44] {
             return Err(CTGPMetadataError::NotCKGD);
@@ -90,7 +90,8 @@ impl CTGPMetadata {
         let metadata_version = data[data.len() - 0x0D];
         let security_data_size = if metadata_version < 7 { 0x44 } else { 0x54 };
 
-        let input_data = &data[..data.len() - metadata_size as usize];
+        let header_data = &data[..0x88];
+        let input_data = &data[0x88..data.len() - metadata_size as usize];
         let metadata = &data[data.len() - metadata_size as usize..];
         let mut current_offset = 0usize;
 
@@ -145,25 +146,22 @@ impl CTGPMetadata {
         // I guess this'll have to wait until Chadsoft comes back up
         let mut previous_subtractions = 0.0;
         let mut true_lap_time_subtractions = [0.0; 10];
-        let mut lap_count = 0;
-        for time in true_lap_time_subtractions.iter_mut() {
-            *time = f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?);
-            if *time != 0.0 {
-                lap_count += 1;
-            }
+        let lap_count = header_data[0x10];
+        for index in 0..lap_count as usize {
+            let mut true_time_subtraction = f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?);
+            
             // subtract the sum of the previous laps' difference because the lap differences add up to
             // have its decimal portion be equal to the total time
-            *time -= previous_subtractions;
-            
-            while *time > 0.0 {
-                *time -= 1.0;
+            true_time_subtraction -= previous_subtractions;
+            while true_time_subtraction > 0.0 {
+                true_time_subtraction -= 1.0;
             }
-            
-            previous_subtractions += *time;
+            previous_subtractions += true_time_subtraction;
+            true_lap_time_subtractions[index] = true_time_subtraction;
             current_offset -= 0x04;
         }
         
-        current_offset += 0x2C;
+        current_offset += 0x04 * (lap_count as usize + 1);
         
         let rtc_race_end = datetime_from_timestamp(u64::from_be_bytes(
             metadata[current_offset..current_offset + 0x08].try_into()?,

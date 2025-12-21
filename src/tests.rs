@@ -136,7 +136,7 @@ fn test_ctgp_metadata() {
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
 
-    let ctgp_metadata = CTGPMetadata::new(&rkg_data[0x88..]).expect("Failed to read CTGP metadata");
+    let ctgp_metadata = CTGPMetadata::new(&rkg_data).expect("Failed to read CTGP metadata");
 
     // Some asserts
     assert_eq!(
@@ -157,12 +157,12 @@ fn test_ctgp_metadata() {
 #[test]
 fn print_ctgp_metadata() {
     let mut rkg_data: Vec<u8> = Vec::new();
-    std::fs::File::open("./test_ghosts/9laps_test.rkg")
-        .expect("Couldn't find `./test_ghosts/9laps_test.rkg`")
+    std::fs::File::open("./test_ghosts/JC_LC_Compressed.rkg")
+        .expect("Couldn't find `./test_ghosts/JC_LC_Compressed.rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
 
-    let ctgp_metadata = CTGPMetadata::new(&rkg_data[0x88..]).expect("Failed to read CTGP metadata");
+    let ctgp_metadata = CTGPMetadata::new(&rkg_data).expect("Failed to read CTGP metadata");
 
     // Print info
     print!("Track SHA1: ");
