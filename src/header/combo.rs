@@ -43,7 +43,9 @@ impl Combo {
 
 impl FromByteHandler for Combo {
     type Err = ComboError;
-    /// Expects Header 0x08..0x0A
+    /// Expects Header 0x08..0x0A, 2 Bytes, where V = vehicle and C = character
+    /// 1. VVVVVVCC
+    /// 2. CCCCXXXX
     fn from_byte_handler<T>(handler: T) -> Result<Self, Self::Err>
     where
         T: TryInto<ByteHandler>,
@@ -51,10 +53,11 @@ impl FromByteHandler for Combo {
     {
         let mut handler = handler.try_into()?;
 
-        handler.shift_right(2);
-        let vehicle = handler.copy_byte(2);
-        handler.shift_right(2);
-        let character = handler.copy_byte(3) & 0x3F;
+        handler.shift_right(2); // 1. XXVVVVVV
+        let vehicle = handler.copy_byte(0) & 0x3F;
+
+        handler.shift_right(2); // 2. VVCCCCCC
+        let character = handler.copy_byte(1) & 0x3F;
 
         Self::new(
             Vehicle::try_from(vehicle).map_err(|_| ComboError::InvalidVehicleId)?,
