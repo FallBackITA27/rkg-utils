@@ -28,7 +28,7 @@ impl FromByteHandler for Controller {
         T: TryInto<crate::byte_handler::ByteHandler>,
         Self::Err: From<T::Error>,
     {
-        (handler.try_into()?.copy_byte(3) & 0x0F).try_into()
+        (handler.try_into()?.copy_byte(0) & 0x0F).try_into()
     }
 }
 

@@ -53,8 +53,8 @@ impl FromByteHandler for Combo {
     {
         let mut handler = handler.try_into()?;
 
-        handler.shift_right(2); // 1. XXVVVVVV
-        let vehicle = handler.copy_byte(0) & 0x3F;
+        handler.shift_right(2); // 1. 00VVVVVV
+        let vehicle = handler.copy_byte(0);
 
         handler.shift_right(2); // 2. VVCCCCCC
         let character = handler.copy_byte(1) & 0x3F;

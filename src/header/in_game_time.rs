@@ -77,6 +77,7 @@ impl FromByteHandler for InGameTime {
         let minutes = handler.copy_byte(0);
         let seconds = handler.copy_byte(1) >> 1;
         handler.shift_left(9);
+
         Ok(Self {
             minutes,
             seconds,

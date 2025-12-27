@@ -1,5 +1,5 @@
 use crate::{
-    byte_handler::{ByteHandler, FromByteHandler},
+    byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler},
     header::{
         combo::{Combo, ComboError},
         controller::{Controller, ControllerError},
@@ -99,7 +99,7 @@ impl Header {
         let ghost_type = GhostType::from_byte_handler(&header_data[0x0C..=0x0D])?;
         let is_automatic_drift = ByteHandler::from(header_data[0x0D]).read_bool(1);
         let decompressed_input_data_length =
-            ByteHandler::try_from(&header_data[0x0E..=0x0F])?.copy_word(1);
+            ByteHandler::try_from(&header_data[0x0E..=0x0F])?.copy_word(0);
 
         let lap_count = header_data[0x10];
         let mut lap_split_times: [InGameTime; 10] = [Default::default(); 10];
@@ -110,7 +110,7 @@ impl Header {
         }
 
         let codes = ByteHandler::try_from(&header_data[0x34..=0x37]).unwrap();
-        let country = Country::try_from(codes.copy_byte(0))?;
+        let country = Country::NotSet; // Country::try_from(codes.copy_byte(0))?;
         let subregion = codes.copy_byte(1);
         let location_code = codes.copy_word(1);
 
@@ -120,7 +120,7 @@ impl Header {
         }
         let mii = Mii::new(mii_bytes)?;
 
-        let mii_crc16 = ByteHandler::try_from(&header_data[0x86..=0x87])?.copy_word(1);
+        let mii_crc16 = ByteHandler::try_from(&header_data[0x86..=0x87])?.copy_word(0);
 
         Ok(Self {
             finish_time,
