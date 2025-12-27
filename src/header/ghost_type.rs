@@ -1,11 +1,9 @@
-use crate::byte_handler::{ByteHandlerError, FromByteHandler};
+use crate::byte_handler::FromByteHandler;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GhostTypeError {
     #[error("Nonexistent Ghost Type")]
     NonexistentGhostType,
-    #[error("ByteHandler Error: {0}")]
-    ByteHandlerError(#[from] ByteHandlerError),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -58,13 +56,11 @@ impl From<GhostType> for u8 {
 impl FromByteHandler for GhostType {
     type Err = GhostTypeError;
     /// Expects Header 0x0C..=0x0D
-    fn from_byte_handler<T>(handler: T) -> Result<Self, Self::Err>
-    where
-        T: TryInto<crate::byte_handler::ByteHandler>,
-        Self::Err: From<T::Error>,
-    {
-        let mut handler = handler.try_into()?;
+    fn from_byte_handler<T: TryInto<crate::byte_handler::ByteHandler>>(
+        handler: T,
+    ) -> Result<Self, Self::Err> {
+        let mut handler = handler.try_into().map_err(|_| ()).unwrap();
         handler.shift_right(2);
-        handler.copy_byte(1).try_into()
+        (handler.copy_byte(3)).try_into()
     }
 }

@@ -1,17 +1,11 @@
 // https://wiki.tockdom.com/wiki/Slot
 
-use std::convert::Infallible;
-
-use crate::byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler};
+use crate::byte_handler::{ByteHandler, FromByteHandler};
 
 #[derive(thiserror::Error, Debug)]
 pub enum SlotIdError {
     #[error("Non Existent Slot ID")]
     NonExistentSlotId,
-    #[error("ByteHandler Error: {0}")]
-    ByteHandlerError(#[from] ByteHandlerError),
-    #[error("")]
-    Infallible(#[from] Infallible),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -180,11 +174,13 @@ impl TryFrom<u8> for SlotId {
 impl FromByteHandler for SlotId {
     type Err = SlotIdError;
     /// Expects Header 0x07
-    fn from_byte_handler<T>(handler: T) -> Result<Self, Self::Err>
-    where
-        T: TryInto<ByteHandler>,
-        Self::Err: From<T::Error>,
-    {
-        (handler.try_into()?.copy_byte(0) >> 2).try_into()
+    fn from_byte_handler<T: TryInto<ByteHandler>>(handler: T) -> Result<Self, Self::Err> {
+        (handler
+            .try_into()
+            .map_err(|_| ())
+            .expect("TODO: Handle this!")
+            .copy_byte(3)
+            >> 2)
+            .try_into()
     }
 }

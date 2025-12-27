@@ -1,4 +1,4 @@
-use crate::byte_handler::{ByteHandlerError, FromByteHandler};
+use crate::byte_handler::FromByteHandler;
 
 #[derive(thiserror::Error, Debug)]
 pub enum DateError {
@@ -8,8 +8,6 @@ pub enum DateError {
     MonthInvalid,
     #[error("Day is invalid")]
     DayInvalid,
-    #[error("ByteHandler Error: {0}")]
-    ByteHandlerError(#[from] ByteHandlerError),
 }
 
 #[derive(Debug)]
@@ -52,23 +50,21 @@ impl Date {
 
 impl FromByteHandler for Date {
     type Err = DateError;
-    /// Expects Header 0x09..=0x0B, 3 bytes
-    /// where Y is year, M is month and D is day
-    /// 1. XXXXYYYY
-    /// 2. YYYMMMMD
-    /// 3. DDDDXXXX
-    fn from_byte_handler<T>(handler: T) -> Result<Self, Self::Err>
-    where
-        T: TryInto<crate::byte_handler::ByteHandler>,
-        Self::Err: From<T::Error>,
-    {
-        let mut handler = handler.try_into()?;
+    /// Expects Header 0x09..=0x0B
+    fn from_byte_handler<T: TryInto<crate::byte_handler::ByteHandler>>(
+        handler: T,
+    ) -> Result<Self, Self::Err> {
+        let mut handler = handler
+            .try_into()
+            .map_err(|_| ())
+            .expect("TODO: handle this");
 
         handler.shift_right(4);
-        let year = ((handler.copy_byte(1) >> 1) as u16) + 2000;
-        let day = handler.copy_byte(2) & 0x1F;
-        handler.shift_right(5);
-        let month = handler.copy_byte(2) & 0x0F;
+        let day = handler.copy_byte(3) & 0x1F;
+        handler.shift_right(1);
+        let year = u16::from(handler.copy_byte(2) & 0x7F) + 2000;
+        handler.shift_right(4);
+        let month = handler.copy_byte(3) & 0x0F;
 
         Self::new(year, month, day)
     }
