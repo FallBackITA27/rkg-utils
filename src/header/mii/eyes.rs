@@ -74,7 +74,7 @@ impl FromByteHandler for Eyes {
     }
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum EyeColor {
     Black,
     Gray,

@@ -63,7 +63,7 @@ pub enum LipsError {
     Infallible(#[from] Infallible),
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum LipsColor {
     Orange,
     Red,
@@ -81,7 +81,7 @@ impl TryFrom<u8> for LipsColor {
     }
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum LipsType {
     Neutral,
     NeutralLips,

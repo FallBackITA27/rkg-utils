@@ -48,7 +48,7 @@ pub enum NoseError {
     Infallible(#[from] Infallible),
 }
 
-#[derive(Clone, Copy,Debug,PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum NoseType {
     Normal,
     Rounded,

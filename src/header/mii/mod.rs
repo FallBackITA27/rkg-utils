@@ -3,7 +3,18 @@
 use crate::{
     byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler},
     header::mii::{
-        bday::{Birthday, BirthdayError}, build::{Build, BuildError}, eyebrows::{Eyebrows, EyebrowsError}, eyes::{Eyes, EyesError}, facial_hair::{FacialHair, FacialHairError}, fav_color::{FavColor, FavColorError}, glasses::{Glasses, GlassesError}, hair::{Hair, HairError}, head::{Head, HeadError}, lips::{Lips, LipsError}, mole::{Mole, MoleError}, nose::{Nose, NoseError}
+        bday::{Birthday, BirthdayError},
+        build::{Build, BuildError},
+        eyebrows::{Eyebrows, EyebrowsError},
+        eyes::{Eyes, EyesError},
+        facial_hair::{FacialHair, FacialHairError},
+        fav_color::{FavColor, FavColorError},
+        glasses::{Glasses, GlassesError},
+        hair::{Hair, HairError},
+        head::{Head, HeadError},
+        lips::{Lips, LipsError},
+        mole::{Mole, MoleError},
+        nose::{Nose, NoseError},
     },
 };
 

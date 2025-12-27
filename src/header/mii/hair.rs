@@ -52,7 +52,7 @@ impl FromByteHandler for Hair {
     }
 }
 
-#[derive(Clone, Copy, PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum HairColor {
     Black,
     Chocolate,

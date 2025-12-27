@@ -91,8 +91,9 @@ impl CTGPMetadata {
 
         let finish_time = InGameTime::from_byte_handler(&header_data[0x04..0x07])?;
         let true_time_subtraction =
-            (f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?)
-               as f64 * 1e+9).floor() as i64;
+            (f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?) as f64
+                * 1e+9)
+                .floor() as i64;
         let exact_finish_time = ExactFinishTime::new(
             finish_time.minutes(),
             finish_time.seconds(),
@@ -134,8 +135,10 @@ impl CTGPMetadata {
 
         for index in 0..lap_count as usize {
             let mut true_time_subtraction =
-                ((f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?) as f64)
-                    * 1e+9).floor() as i64;
+                ((f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?)
+                    as f64)
+                    * 1e+9)
+                    .floor() as i64;
 
             let lap_time = InGameTime::from_byte_handler(
                 &header_data[in_game_time_offset..in_game_time_offset + 0x03],
@@ -144,7 +147,7 @@ impl CTGPMetadata {
             // subtract the sum of the previous laps' difference because the lap differences add up to
             // have its decimal portion be equal to the total time
             true_time_subtraction -= previous_subtractions;
-            
+
             if true_time_subtraction > 1e+9 as i64 {
                 true_time_subtraction -= subtraction_ps;
                 subtraction_ps = if subtraction_ps == 0 { 1e+9 as i64 } else { 0 };
@@ -193,7 +196,7 @@ impl CTGPMetadata {
             let idx = current_input_byte as usize;
             let input = &input_data[idx..idx + 2];
 
-            if input[0] & 0x40 != 0 {
+            if contains_ctgp_pause(input[0]) {
                 pause_frames.push(elapsed_frames);
             }
 

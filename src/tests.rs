@@ -1,7 +1,24 @@
 use crate::{
     ctgp_metadata::CTGPMetadata,
     header::{
-        Header, combo::{Character, Vehicle}, controller::Controller, date::Date, ghost_type::GhostType, location::country::Country, mii::{eyebrows::EyebrowType, eyes::{EyeColor, EyeType}, facial_hair::{BeardType, MustacheType}, fav_color::FavColor, glasses::{GlassesColor, GlassesType}, hair::{HairColor, HairType}, head::{FaceFeatures, HeadShape, SkinTone}, lips::{LipsColor, LipsType}, nose::NoseType}, slot_id::SlotId
+        Header,
+        combo::{Character, Vehicle},
+        controller::Controller,
+        date::Date,
+        ghost_type::GhostType,
+        location::country::Country,
+        mii::{
+            eyebrows::EyebrowType,
+            eyes::{EyeColor, EyeType},
+            facial_hair::{BeardType, MustacheType},
+            fav_color::FavColor,
+            glasses::{GlassesColor, GlassesType},
+            hair::{HairColor, HairType},
+            head::{FaceFeatures, HeadShape, SkinTone},
+            lips::{LipsColor, LipsType},
+            nose::NoseType,
+        },
+        slot_id::SlotId,
     },
     input_data::InputData,
 };
@@ -59,7 +76,10 @@ fn test_rkg_header() {
 
     assert_eq!(header.mii().eyebrows().eyebrow_type(), EyebrowType::None);
     assert_eq!(header.mii().eyebrows().rotation(), 5);
-    assert_eq!(header.mii().eyebrows().eyebrow_color(), HairColor::Chocolate);
+    assert_eq!(
+        header.mii().eyebrows().eyebrow_color(),
+        HairColor::Chocolate
+    );
     assert_eq!(header.mii().eyebrows().size(), 4);
     assert_eq!(header.mii().eyebrows().y(), 10);
     assert_eq!(header.mii().eyebrows().x(), 2);
@@ -85,7 +105,10 @@ fn test_rkg_header() {
     assert_eq!(header.mii().glasses().size(), 4);
     assert_eq!(header.mii().glasses().y(), 10);
 
-    assert_eq!(header.mii().facial_hair().mustache_type(), MustacheType::None);
+    assert_eq!(
+        header.mii().facial_hair().mustache_type(),
+        MustacheType::None
+    );
     assert_eq!(header.mii().facial_hair().beard_type(), BeardType::None);
     assert_eq!(header.mii().facial_hair().color(), HairColor::Black);
     assert_eq!(header.mii().facial_hair().mustache_size(), 4);
@@ -305,11 +328,23 @@ fn test_exact_finish_time() {
         .expect("Couldn't find `./test_ghosts/00m58s6479888 David .rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
-    
+
     let ctgp_metadata = CTGPMetadata::new(&rkg_data).expect("Failed to read CTGP metadata");
-    
-    assert_eq!(ctgp_metadata.exact_finish_time().to_string(), "00:58.647988872949");
-    assert_eq!(ctgp_metadata.exact_lap_times()[0].to_string(), "00:19.607006953895");
-    assert_eq!(ctgp_metadata.exact_lap_times()[1].to_string(), "00:19.623577742219");
-    assert_eq!(ctgp_metadata.exact_lap_times()[2].to_string(), "00:19.417404176835");
+
+    assert_eq!(
+        ctgp_metadata.exact_finish_time().to_string(),
+        "00:58.647988872949"
+    );
+    assert_eq!(
+        ctgp_metadata.exact_lap_times()[0].to_string(),
+        "00:19.607006953895"
+    );
+    assert_eq!(
+        ctgp_metadata.exact_lap_times()[1].to_string(),
+        "00:19.623577742219"
+    );
+    assert_eq!(
+        ctgp_metadata.exact_lap_times()[2].to_string(),
+        "00:19.417404176835"
+    );
 }

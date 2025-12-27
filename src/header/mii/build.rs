@@ -32,8 +32,12 @@ impl Build {
         Ok(Self { height, weight })
     }
 
-    pub fn height(&self)->u8{self.height}
-    pub fn weight(&self)->u8{self.weight}
+    pub fn height(&self) -> u8 {
+        self.height
+    }
+    pub fn weight(&self) -> u8 {
+        self.weight
+    }
 }
 
 impl FromByteHandler for Build {

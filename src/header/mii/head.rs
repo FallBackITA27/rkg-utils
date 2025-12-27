@@ -50,7 +50,8 @@ impl FromByteHandler for Head {
 
         Ok(Head {
             shape: HeadShape::try_from(shape_value).map_err(|_| HeadError::ShapeInvalid)?,
-            skin_tone: SkinTone::try_from((byte >> 4)&0x07).map_err(|_| HeadError::SkinToneInvalid)?,
+            skin_tone: SkinTone::try_from((byte >> 4) & 0x07)
+                .map_err(|_| HeadError::SkinToneInvalid)?,
             face_features: FaceFeatures::try_from(byte & 0x0F)
                 .map_err(|_| HeadError::FaceFeaturesInvalid)?,
         })

@@ -63,7 +63,7 @@ pub enum GlassesError {
     Infallible(#[from] Infallible),
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum GlassesColor {
     Black,
     Brown,
@@ -87,7 +87,7 @@ impl TryFrom<u8> for GlassesColor {
     }
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum GlassesType {
     None,
     Square,

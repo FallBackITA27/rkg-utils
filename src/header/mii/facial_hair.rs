@@ -67,7 +67,7 @@ pub enum FacialHairError {
     Infallible(#[from] Infallible),
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum BeardType {
     None,
     Goatee,
@@ -87,7 +87,7 @@ impl TryFrom<u8> for BeardType {
     }
 }
 
-#[derive(Clone, Copy,PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MustacheType {
     None,
     Walrus,
