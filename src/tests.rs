@@ -1,5 +1,5 @@
 use crate::{
-    ctgp_metadata::CTGPMetadata,
+    ctgp_metadata::{self, CTGPMetadata},
     header::{
         Header,
         combo::{Character, Vehicle},
@@ -201,8 +201,7 @@ fn print_ctgp_metadata() {
             print!("{}, ", version)
         }
         println!();
-    }
-    else {
+    } else {
         println!("Unknown")
     }
     println!();

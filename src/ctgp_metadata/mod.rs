@@ -65,6 +65,14 @@ impl CTGPMetadata {
             u32::from_be_bytes(data[data.len() - 0x0C..data.len() - 0x08].try_into()?);
 
         let metadata_version = data[data.len() - 0x0D];
+
+        match metadata_version {
+            1 | 2 | 3 | 5 | 6 | 7 => {}
+            _ => {
+                return Err(CTGPMetadataError::InvalidMetadataVersion);
+            }
+        }
+
         let security_data_size = if metadata_version < 7 { 0x44 } else { 0x54 };
 
         let header_data = &data[..0x88];
@@ -105,7 +113,8 @@ impl CTGPMetadata {
         let mut lap_split_suspicious_intersections = Some([false; 10]);
 
         if metadata_version >= 2 {
-            possible_ctgp_versions = CTGPVersion::from(&metadata[current_offset..current_offset + 0x04]);
+            possible_ctgp_versions =
+                CTGPVersion::from(&metadata[current_offset..current_offset + 0x04]);
             current_offset += 0x04;
 
             let laps_handler = ByteHandler::try_from(&metadata[current_offset..current_offset + 2])
@@ -119,7 +128,7 @@ impl CTGPMetadata {
             current_offset -= 0x04;
         } else {
             // Metadata version 2 was introduced in between the 1.03.1044 and 1046 update, so it must be 1.03.1044
-            possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044)]));
+            possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044, 1)]));
             lap_split_suspicious_intersections = None;
         }
 
@@ -197,7 +206,8 @@ impl CTGPMetadata {
 
             if contains_ctgp_pause(input[0]) {
                 // Convert frame count to InGameTime
-                let mut pause_timestamp_seconds = (elapsed_frames - 240) as f64 / 59.94;
+                // Subtract 240 frames for countdown, another 2 frames because CTGP logs the pause 2 frames after it actually happens
+                let mut pause_timestamp_seconds = (elapsed_frames - 242) as f64 / 59.94;
                 let mut minutes = 0;
                 let mut seconds = 0;
                 let milliseconds;
