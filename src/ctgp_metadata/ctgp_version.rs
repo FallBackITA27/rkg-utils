@@ -261,7 +261,7 @@ impl Display for CTGPVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{:02}.{:02}.{:04}-{}",
+            "{}.{:02}.{:04}-{}",
             self.major, self.minor, self.revision, self.subrevision
         )
     }
