@@ -1,3 +1,6 @@
+// TODO: consider only using v1.3 regions for this
+// AnyGlobe Changer, TT-Rec, and Auto TT Recorder (extended region stuff) all use Regions v1.3, so to keep consistency potentially only use 1.3 here
+
 use crate::header::location::{country::Country, subregion::Subregion};
 
 pub mod country;

@@ -110,7 +110,7 @@ impl Header {
         }
 
         let codes = ByteHandler::try_from(&header_data[0x34..=0x37]).unwrap();
-        let country = Country::NotSet; // Country::try_from(codes.copy_byte(0))?;
+        let country = Country::try_from(codes.copy_byte(0))?;
         let subregion = codes.copy_byte(1);
         let location_code = codes.copy_word(1);
 
