@@ -532,7 +532,6 @@ impl fmt::Display for Subregion {
     }
 }
 
-
 macro_rules! map_subregion {
     ($country:expr, $sub_id:expr, {
         $(

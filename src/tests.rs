@@ -128,8 +128,8 @@ fn test_rkg_header() {
 
 #[test]
 fn print_rkg_header() {
-    let header =
-        Header::new_from_path("./test_ghosts/00m58s6479888 David .rkg").expect("Couldn't read header");
+    let header = Header::new_from_path("./test_ghosts/00m58s6479888 David .rkg")
+        .expect("Couldn't read header");
 
     println!("Track: {:?}", header.slot_id());
     println!("Time: {}", header.finish_time());
@@ -138,15 +138,26 @@ fn print_rkg_header() {
     println!("Country: {}", header.country());
     println!("Subregion: {}", header.subregion());
     println!("Controller: {:?}", header.controller());
-    println!("Combo: {:?} on {:?} ({} Drift)", header.combo().character(), header.combo().vehicle(), if header.is_automatic_drift() { "Automatic" } else { "Manual" });
+    println!(
+        "Combo: {:?} on {:?} ({} Drift)",
+        header.combo().character(),
+        header.combo().vehicle(),
+        if header.is_automatic_drift() {
+            "Automatic"
+        } else {
+            "Manual"
+        }
+    );
     println!("Input data compressed? {}", header.is_compressed());
-    println!("Decompressed input data length: {}", header.decompressed_input_data_length());
+    println!(
+        "Decompressed input data length: {}",
+        header.decompressed_input_data_length()
+    );
     println!("Total lap count: {}\n", header.lap_count());
-    
+
     for (index, lap_time) in header.lap_split_times().iter().enumerate() {
         println!("Lap {}: {}", index + 1, lap_time);
     }
-    
 }
 
 #[test]
