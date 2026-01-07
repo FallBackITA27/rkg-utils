@@ -247,6 +247,8 @@ impl CTGPVersion {
                 possible_versions.push(CTGPVersion::new(1, 3, 1180, 5));
                 possible_versions.push(CTGPVersion::new(1, 3, 1180, 7));
                 possible_versions.push(CTGPVersion::new(1, 3, 1182, 4));
+                possible_versions.push(CTGPVersion::new(1, 3, 1186, 5));
+                possible_versions.push(CTGPVersion::new(1, 3, 1188, 3));
             }
 
             _ => {
