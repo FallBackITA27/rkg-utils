@@ -17,6 +17,10 @@ impl Location {
         self.subregion
     }
 
+    pub fn version(&self) -> Version {
+        self.version
+    }
+
     pub fn find(country_id: u8, subregion_id: u8, version: Option<Version>) -> Option<Location> {
         match LocationFinder::find(country_id, subregion_id, version) {
             LocationFinder::None => None,

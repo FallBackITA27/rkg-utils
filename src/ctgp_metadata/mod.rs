@@ -76,8 +76,8 @@ impl CTGPMetadata {
         let security_data_size = if metadata_version < 7 { 0x44 } else { 0x54 };
 
         let header_data = &data[..0x88];
-        let input_data = &data[0x88..data.len() - len as usize];
-        let metadata = &data[data.len() - len as usize..];
+        let input_data = &data[0x88..data.len() - len];
+        let metadata = &data[data.len() - len..];
         let mut current_offset = 0usize;
 
         let security_data = Vec::from(&metadata[..security_data_size]);
@@ -141,7 +141,7 @@ impl CTGPMetadata {
         let mut in_game_time_offset = 0x11usize;
         let mut subtraction_ps = 0i64;
 
-        for index in 0..lap_count as usize {
+        for exact_lap_time in exact_lap_times.iter_mut().take(lap_count as usize) {
             let mut true_time_subtraction =
                 ((f32::from_be_bytes(metadata[current_offset..current_offset + 0x04].try_into()?)
                     as f64)
@@ -161,7 +161,7 @@ impl CTGPMetadata {
                 subtraction_ps = if subtraction_ps == 0 { 1e+9 as i64 } else { 0 };
             }
             previous_subtractions += true_time_subtraction;
-            exact_lap_times[index] = ExactFinishTime::new(
+            *exact_lap_time = ExactFinishTime::new(
                 lap_time.minutes(),
                 lap_time.seconds(),
                 (lap_time.milliseconds() as i64 * 1e+9 as i64 + true_time_subtraction) as u64,
@@ -210,7 +210,7 @@ impl CTGPMetadata {
                 let mut pause_timestamp_seconds = (elapsed_frames - 242) as f64 / 59.94;
                 let mut minutes = 0;
                 let mut seconds = 0;
-                let milliseconds;
+                
 
                 while pause_timestamp_seconds >= 60.0 {
                     minutes += 1;
@@ -222,7 +222,7 @@ impl CTGPMetadata {
                     pause_timestamp_seconds -= 1.0;
                 }
 
-                milliseconds = (pause_timestamp_seconds * 1000.0) as u16;
+                let milliseconds = (pause_timestamp_seconds * 1000.0) as u16;
 
                 pause_times.push(InGameTime::new(minutes, seconds, milliseconds));
             }
@@ -400,6 +400,10 @@ impl CTGPMetadata {
 
     pub fn len(&self) -> usize {
         self.len
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
     }
 }
 

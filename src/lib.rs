@@ -1,7 +1,7 @@
 use std::{array::TryFromSliceError, io::Read};
 
 use crate::{
-    byte_handler::ByteHandler, ctgp_metadata::CTGPMetadata, header::Header, input_data::InputData,
+    ctgp_metadata::CTGPMetadata, header::Header, input_data::InputData,
 };
 
 pub mod byte_handler;
@@ -38,7 +38,7 @@ pub enum GhostError {
     IOError(#[from] std::io::Error),
 }
 
-struct Ghost {
+pub struct Ghost {
     header: header::Header,
     input_data: input_data::InputData,
     ctgp_metadata: Option<ctgp_metadata::CTGPMetadata>,
@@ -46,18 +46,18 @@ struct Ghost {
 }
 
 impl Ghost {
-    fn new_from_file<T: AsRef<std::path::Path>>(path: T) -> Result<Self, GhostError> {
+    pub fn new_from_file<T: AsRef<std::path::Path>>(path: T) -> Result<Self, GhostError> {
         let mut buf = Vec::with_capacity(0x100);
         std::fs::File::open(path)?.read_to_end(&mut buf)?;
         Self::new(&buf)
     }
 
-    fn new(bytes: &[u8]) -> Result<Self, GhostError> {
+    pub fn new(bytes: &[u8]) -> Result<Self, GhostError> {
         let input_data_end_offset;
 
         let header = Header::new(&bytes[..0x88])?;
 
-        let ctgp_metadata = if let Ok(ctgp_metadata) = CTGPMetadata::new(&bytes) {
+        let ctgp_metadata = if let Ok(ctgp_metadata) = CTGPMetadata::new(bytes) {
             input_data_end_offset = bytes.len() - ctgp_metadata.len();
             Some(ctgp_metadata)
         } else {
@@ -92,4 +92,6 @@ impl Ghost {
     pub fn ctgp_metadata(&self) -> &Option<CTGPMetadata> {
         &self.ctgp_metadata
     }
+
+    pub fn crc32(&self) -> u32 {self.crc32}
 }

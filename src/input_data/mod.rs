@@ -131,7 +131,7 @@ impl InputData {
                 .map(|f| f.frame_duration() - face_offset)
                 .unwrap_or(u32::MAX);
             let stick_remaining = stick
-                .map(|s| s.frame_duration() as u32 - stick_offset)
+                .map(|s| s.frame_duration() - stick_offset)
                 .unwrap_or(u32::MAX);
             let dpad_remaining = dpad
                 .map(|d| d.frame_duration() - dpad_offset)

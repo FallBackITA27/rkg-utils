@@ -206,7 +206,7 @@ impl Display for Character {
 }
 
 impl Character {
-    fn is_impossible(self) -> bool {
+    pub fn is_impossible(self) -> bool {
         match self {
             Self::Mario
             | Self::BabyPeach
