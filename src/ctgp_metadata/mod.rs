@@ -134,7 +134,7 @@ impl CTGPMetadata {
             current_offset -= 0x04;
         } else {
             // Metadata version 2 was introduced in between the 1.03.1044 and 1046 update, so it must be 1.03.1044
-            possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044, 1)]));
+            possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044, None)]));
             lap_split_suspicious_intersections = None;
         }
 
