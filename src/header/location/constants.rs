@@ -1,9 +1,13 @@
 use super::Location;
+
+/// Error type for country-related failures.
 #[derive(thiserror::Error, Debug)]
 pub enum CountryError {
     #[error("Nonexistent Country")]
     NonexistentCountry,
 }
+
+/// Error type for country-related failures.
 #[derive(thiserror::Error, Debug)]
 pub enum SubregionError {
     #[error("Nonexistent Subregion")]
@@ -11,14 +15,24 @@ pub enum SubregionError {
     #[error("CountryError: {0}")]
     CountryError(#[from] CountryError),
 }
+
+
+/// Represents the different Extended Region versions
 #[derive(Debug, PartialEq, Clone, Copy, PartialOrd, Eq, Ord)]
 pub enum Version {
+    /// Present in vanilla game
     Vanilla,
+    /// Wii Extended Regions v1.0
     ER10,
+    /// Wii Extended Regions v1.1
     ER11,
+    /// Wii Extended Regions v1.2
     ER12,
+    /// Wii Extended Regions v1.3
     ER13,
 }
+
+/// Represents every available country from a Mario Kart Wii ghost
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Country {
     Japan,
@@ -284,6 +298,8 @@ pub enum Country {
     Greenland,
     NotSet,
 }
+
+/// Represents subregions of each country
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Subregion {
     Japan(JapanSubregion),
