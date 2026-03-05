@@ -1,11 +1,12 @@
+/// Error type for CTGP category-related failures
 #[derive(thiserror::Error, Debug)]
 pub enum CategoryError {
     #[error("Nonexistent Category")]
     NonexistentCategory,
 }
 
+/// Enum representing what CTGP categorizes the run as.
 #[derive(Clone, Copy, Debug, PartialEq)]
-/// Represents the category of the run via CTGP's metadata info
 pub enum Category {
     NoShortcut,
     Normal,
@@ -26,6 +27,30 @@ pub enum Category {
 }
 
 impl Category {
+    /// Attempts to construct a [`Category`] from raw CTGP footer bytes.
+    ///
+    /// The `category` byte encodes the ruleset and speed class, while the
+    /// `shortcut` byte disambiguates between [`Category::Normal`]/[`Category::Shortcut`]
+    /// (and their TAS/200cc equivalents) when `category` is `0x00`, `0x03`, `0x04`, or `0x07`.
+    ///
+    /// # Arguments
+    ///
+    /// * `category` - The primary category byte from CTGP metadata.
+    /// * `shortcut` - The shortcut flag byte; a non-zero value indicates shortcuts are used.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CategoryError::NonexistentCategory`] if the `category` byte does not
+    /// correspond to any known category.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(Category::try_from(0x00, 0).unwrap(), Category::Normal);
+    /// assert_eq!(Category::try_from(0x00, 1).unwrap(), Category::Shortcut);
+    /// assert_eq!(Category::try_from(0x01, 0).unwrap(), Category::Glitch);
+    /// assert!(Category::try_from(0xFF, 0).is_err());
+    /// ```
     pub fn try_from(category: u8, shortcut: u8) -> Result<Self, CategoryError> {
         match category {
             0x00 => {

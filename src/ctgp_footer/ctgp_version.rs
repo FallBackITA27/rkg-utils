@@ -1,14 +1,30 @@
 use std::fmt::Display;
 
+/// Represents a CTGP version number with major, minor, revision, and optional subrevision components.
+///
+/// Versions are formatted as `major.minor.revision` or `major.minor.revision-subrevision`
+/// when a subrevision is present (e.g. `1.03.1066-9`).
 #[derive(Clone, Copy, Debug)]
 pub struct CTGPVersion {
+    /// Major version number.
     major: u8,
+    /// Minor version number.
     minor: u8,
+    /// Revision number.
     revision: u16,
+    /// Optional subrevision number, present in most release versions.
     subrevision: Option<u8>,
 }
 
 impl CTGPVersion {
+    /// Creates a new [`CTGPVersion`] with the given components.
+    ///
+    /// # Arguments
+    ///
+    /// * `major` - Major version number.
+    /// * `minor` - Minor version number.
+    /// * `revision` - Revision number.
+    /// * `subrevision` - Optional subrevision number.
     pub fn new(major: u8, minor: u8, revision: u16, subrevision: Option<u8>) -> Self {
         Self {
             major,
@@ -18,7 +34,35 @@ impl CTGPVersion {
         }
     }
 
-    /// Returns an Option<Vec<>> of possible release versions
+    /// Attempts to map the 4-byte CTGP CORE version to one or more possible release versions.
+    ///
+    /// Because multiple CTGP releases can share the same internal byte tag, this returns a
+    /// [`Vec`] of all [`CTGPVersion`]s that are consistent with the given bytes. Returns
+    /// [`None`] if the byte pattern is not recognised.
+    ///
+    /// # Arguments
+    ///
+    /// * `bytes` - A 4-byte slice containing the raw CTGP CORE version.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Vec<CTGPVersion>)` - One or more possible release versions matching the CORE version.
+    /// * `None` - The CORE version does not correspond to any known CTGP release.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Unambiguous mapping
+    /// let versions = CTGPVersion::from(&[0x01, 0x03, 0x01, 0x42]).unwrap();
+    /// assert_eq!(versions.len(), 1);
+    ///
+    /// // Ambiguous mapping — multiple releases share this tag
+    /// let versions = CTGPVersion::from(&[0x01, 0x03, 0x01, 0x50]).unwrap();
+    /// assert_eq!(versions.len(), 3);
+    ///
+    /// // Unknown tag
+    /// assert!(CTGPVersion::from(&[0xFF, 0xFF, 0xFF, 0xFF]).is_none());
+    /// ```
     pub fn from(bytes: &[u8]) -> Option<Vec<Self>> {
         let mut possible_versions = Vec::new();
         match bytes {
@@ -259,7 +303,27 @@ impl CTGPVersion {
         Some(possible_versions)
     }
 
-    /// Constructs CORE version
+    /// Constructs a [`CTGPVersion`] representing the CORE version.
+    ///
+    /// Each byte is interpreted as a two-digit BCD (binary-coded decimal) value.
+    /// The first two bytes form the major and minor version numbers, and the last
+    /// two bytes are combined to form the revision number. No subrevision is set.
+    ///
+    /// # Arguments
+    ///
+    /// * `bytes` - A slice of at least 4 bytes containing the raw CORE version.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`std::num::ParseIntError`] if any of the formatted byte strings
+    /// cannot be parsed as an integer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let version = CTGPVersion::core_from(&[0x01, 0x03, 0x04, 0x10]).unwrap();
+    /// assert_eq!(version.to_string(), "1.03.0410");
+    /// ```
     pub fn core_from(bytes: &[u8]) -> Result<Self, std::num::ParseIntError> {
         let major: u8 = format!("{:02X}", bytes[0]).parse()?;
         let minor: u8 = format!("{:02X}", bytes[1]).parse()?;
@@ -269,6 +333,10 @@ impl CTGPVersion {
     }
 }
 
+/// Formats the version as `major.minor.revision` or `major.minor.revision-subrevision`
+/// when a subrevision is present.
+///
+/// Minor is zero-padded to 2 digits and revision to 4 digits, e.g. `1.03.1066-9`.
 impl Display for CTGPVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(subrevision) = self.subrevision {

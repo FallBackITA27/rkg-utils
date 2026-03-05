@@ -10,60 +10,121 @@ pub mod category;
 pub mod ctgp_version;
 pub mod exact_finish_time;
 
+/// Errors that can occur while parsing a [`CTGPFooter`].
 #[derive(thiserror::Error, Debug)]
 pub enum CTGPFooterError {
+    /// The ghost file does not contain the expected `CKGD` magic bytes.
     #[error("Ghost is not CKGD")]
     NotCKGD,
+    /// The footer version byte is not one of the supported values (1, 2, 3, 5, 6, 7).
     #[error("Invalid CTGP footer version")]
     InvalidFooterVersion,
+    /// A slice-to-array conversion failed while reading footer data.
     #[error("Try From Slice Error: {0}")]
     TryFromSliceError(#[from] std::array::TryFromSliceError),
+    /// A lap split index was out of range for the recorded lap count.
     #[error("Lap split index not semantically valid")]
     LapSplitIndexError,
+    /// The category bytes could not be mapped to a known [`Category`].
     #[error("Category Error: {0}")]
     CategoryError(#[from] category::CategoryError),
+    /// An in-game time field could not be parsed.
     #[error("In Game Time Error: {0}")]
     InGameTimeError(#[from] crate::header::in_game_time::InGameTimeError),
+    /// A numeric string could not be parsed as an integer.
     #[error("Parse Int Error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
 }
 
+/// Parsed representation of the CTGP-specific footer appended to Mario Kart Wii ghost files.
+///
+/// The footer stores metadata written by CTGP-R at the end of each recorded ghost, including
+/// high-precision timing, version information, RTC timestamps, pause data, and various
+/// integrity/cheat-detection flags.
 pub struct CTGPFooter {
+    /// The raw bytes of the footer (excluding the trailing CRC32).
     raw_data: Vec<u8>,
+    /// The security/signature portion of the footer used for verification.
     security_data: Vec<u8>,
+    /// SHA-1 hash of the track file associated with this ghost.
     track_sha1: [u8; 0x14],
+    /// SHA-1 hash of the full ghost file.
     ghost_sha1: [u8; 0x14],
+    /// The player's unique CTGP player ID.
     player_id: u64,
+    /// Sub-millisecond-accurate finish time derived from the in-game time and CTGP's correction factor.
     exact_finish_time: ExactFinishTime,
+    /// The CTGP CORE version the ghost was driven on.
     core_version: CTGPVersion,
+    /// One or more CTGP release versions consistent with the footer's version bytes.
+    /// `None` if the version bytes are unrecognised.
     possible_ctgp_versions: Option<Vec<CTGPVersion>>,
+    /// Per-lap flags indicating whether CTGP detected a suspicious split-line intersection.
+    /// `None` for footer versions below 2.
     lap_split_suspicious_intersections: Option<[bool; 10]>,
+    /// Sub-millisecond-accurate lap times, one per recorded lap.
     exact_lap_times: [ExactFinishTime; 10],
+    /// Real-time clock timestamp recorded when the race ended.
     rtc_race_end: NaiveDateTime,
+    /// Real-time clock timestamp recorded when the race began.
     rtc_race_begins: NaiveDateTime,
+    /// Total wall-clock time the game was paused during the run.
     rtc_time_paused: TimeDelta,
+    /// In-game timestamps (relative to race start) at which each pause occurred.
     pause_times: Vec<InGameTime>,
+    /// Whether the player had My Stuff enabled during the run.
     my_stuff_enabled: bool,
+    /// Whether any My Stuff content was actually used during the run.
     my_stuff_used: bool,
+    /// Whether a USB GameCube adapter was enabled during the run.
     usb_gamecube_enabled: bool,
+    /// Whether CTGP detected a suspicious split-line intersection on the final lap.
     final_lap_suspicious_intersection: bool,
+    /// Per-lap mushroom usage counts (shroomstrat), indexed by lap number.
     shroomstrat: [u8; 10],
+    /// Whether the player was launched by a cannon during the run.
     cannoned: bool,
+    /// Whether the player went out of bounds during the run.
     went_oob: bool,
+    /// Whether CTGP flagged a potential slowdown event during the run.
     potential_slowdown: bool,
+    /// Whether CTGP flagged potential rapid-fire input during the run.
     potential_rapidfire: bool,
+    /// Whether CTGP's heuristics flagged this ghost as potentially cheated.
     potentially_cheated_ghost: bool,
+    /// Whether the Mii data in the ghost file has been replaced.
     has_mii_data_replaced: bool,
+    /// Whether the Mii name in the ghost file has been replaced.
     has_name_replaced: bool, // Hi Korben
+    /// Whether the player respawned at any point during the run.
     respawns: bool,
+    /// The run category as determined by CTGP's metadata.
     category: Category,
+    /// The footer format version, which determines the layout and size of the footer.
     footer_version: u8,
+    /// Length of the footer in bytes, excluding the trailing CRC32.
     len: usize,
+    /// Number of laps recorded in the ghost.
     lap_count: u8,
 }
 
 impl CTGPFooter {
-    /// Expects full rkg data
+    /// Parses a [`CTGPFooter`] from a complete RKG ghost file byte slice.
+    ///
+    /// Validates the `CKGD` magic and footer version, then reads all footer fields
+    /// including timing data, version info, RTC timestamps, pause events, and
+    /// cheat-detection flags.
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The full raw bytes of the RKG ghost file, including the CTGP footer.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`CTGPFooterError`] if:
+    /// - The `CKGD` magic bytes are absent ([`CTGPFooterError::NotCKGD`]).
+    /// - The footer version is not supported ([`CTGPFooterError::InvalidFooterVersion`]).
+    /// - Any byte slice conversion, integer parse, category parse, or time parse fails.
     pub fn new(data: &[u8]) -> Result<Self, CTGPFooterError> {
         if data[data.len() - 0x08..data.len() - 0x04] != *b"CKGD" {
             return Err(CTGPFooterError::NotCKGD);
@@ -304,45 +365,61 @@ impl CTGPFooter {
         })
     }
 
+    /// Returns the raw bytes of the footer, excluding the trailing CRC32.
     pub fn raw_data(&self) -> &[u8] {
         &self.raw_data
     }
 
+    /// Returns the security/signature portion of the footer.
     pub fn security_data(&self) -> &[u8] {
         &self.security_data
     }
 
+    /// Returns the SHA-1 hash of the track file associated with this ghost.
     pub fn track_sha1(&self) -> &[u8] {
         &self.track_sha1
     }
 
+    /// Returns the SHA-1 hash of the full ghost file.
     pub fn ghost_sha1(&self) -> &[u8] {
         &self.ghost_sha1
     }
 
+    /// Overwrites the stored ghost SHA-1 hash.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CTGPFooterError::TryFromSliceError`] if `ghost_sha1` is not exactly 20 bytes.
     pub(crate) fn set_ghost_sha1(&mut self, ghost_sha1: &[u8]) -> Result<(), CTGPFooterError> {
         self.ghost_sha1 = ghost_sha1.try_into()?;
         Ok(())
     }
 
+    /// Returns the player's unique CTGP player ID.
     pub fn player_id(&self) -> u64 {
         self.player_id
     }
 
+    /// Returns the sub-millisecond-accurate finish time for the run.
     pub fn exact_finish_time(&self) -> ExactFinishTime {
         self.exact_finish_time
     }
 
-    /// Returns CORE version that the ghost was driven on.
+    /// Returns the CORE (base game) version the ghost was driven on.
     pub fn core_version(&self) -> CTGPVersion {
         self.core_version
     }
 
-    /// Returns possible release versions which the ghost was driven on.
+    /// Returns the possible CTGP release versions consistent with this ghost's footer bytes.
+    ///
+    /// Returns `None` if the version bytes did not match any known release.
     pub fn possible_ctgp_versions(&self) -> Option<&Vec<CTGPVersion>> {
         self.possible_ctgp_versions.as_ref()
     }
 
+    /// Returns per-lap suspicious split-line intersection flags for the recorded laps.
+    ///
+    /// Returns `None` for ghosts recorded on footer version 1, which does not include this data.
     pub fn lap_split_suspicious_intersections(&self) -> Option<&[bool]> {
         if let Some(intersections) = &self.lap_split_suspicious_intersections {
             return Some(&intersections[0..self.lap_count as usize]);
@@ -350,10 +427,17 @@ impl CTGPFooter {
         None
     }
 
+    /// Returns the sub-millisecond-accurate lap times for all recorded laps.
     pub fn exact_lap_times(&self) -> &[ExactFinishTime] {
         &self.exact_lap_times[0..self.lap_count as usize]
     }
 
+    /// Returns the sub-millisecond-accurate time for a single lap by index.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CTGPFooterError::LapSplitIndexError`] if `idx` is greater than or equal to
+    /// the number of recorded laps.
     pub fn exact_lap_time(&self, idx: usize) -> Result<ExactFinishTime, CTGPFooterError> {
         if idx >= self.lap_count as usize {
             return Err(CTGPFooterError::LapSplitIndexError);
@@ -361,42 +445,55 @@ impl CTGPFooter {
         Ok(self.exact_lap_times[idx])
     }
 
+    /// Returns the real-time clock timestamp recorded when the race ended.
     pub fn rtc_race_end(&self) -> NaiveDateTime {
         self.rtc_race_end
     }
 
+    /// Returns the real-time clock timestamp recorded when the race began.
     pub fn rtc_race_begins(&self) -> NaiveDateTime {
         self.rtc_race_begins
     }
 
+    /// Returns the total wall-clock duration the game was paused during the run.
     pub fn rtc_time_paused(&self) -> TimeDelta {
         self.rtc_time_paused
     }
 
+    /// Returns the in-game timestamps at which each pause occurred during the run.
     pub fn pause_times(&self) -> &Vec<InGameTime> {
         &self.pause_times
     }
 
+    /// Returns whether the player had My Stuff enabled during the run.
     pub fn my_stuff_enabled(&self) -> bool {
         self.my_stuff_enabled
     }
 
+    /// Returns whether any My Stuff content was actually used during the run.
     pub fn my_stuff_used(&self) -> bool {
         self.my_stuff_used
     }
 
+    /// Returns whether a USB GameCube adapter was enabled during the run.
     pub fn usb_gamecube_enabled(&self) -> bool {
         self.usb_gamecube_enabled
     }
 
+    /// Returns whether CTGP detected a suspicious split-line intersection on the final lap.
     pub fn final_lap_suspicious_intersection(&self) -> bool {
         self.final_lap_suspicious_intersection
     }
 
+    /// Returns the per-lap mushroom usage counts (shroomstrat) for the recorded laps.
     pub fn shroomstrat(&self) -> &[u8] {
         &self.shroomstrat[0..self.lap_count as usize]
     }
 
+    /// Returns a dash-separated string representation of the per-lap mushroom usage counts.
+    ///
+    /// For example, a three-lap run with one mushroom on lap 1 and two on lap 3
+    /// would return `"1-0-2"`.
     pub fn shroomstrat_string(&self) -> String {
         let mut s = String::new();
 
@@ -410,57 +507,70 @@ impl CTGPFooter {
         s
     }
 
+    /// Returns whether the player was launched by a cannon during the run.
     pub fn cannoned(&self) -> bool {
         self.cannoned
     }
 
+    /// Returns whether the player went out of bounds during the run.
     pub fn went_oob(&self) -> bool {
         self.went_oob
     }
 
+    /// Returns whether CTGP flagged a potential slowdown event during the run.
     pub fn potential_slowdown(&self) -> bool {
         self.potential_slowdown
     }
 
+    /// Returns whether CTGP flagged potential rapid-fire input during the run.
     pub fn potential_rapidfire(&self) -> bool {
         self.potential_rapidfire
     }
 
+    /// Returns whether CTGP's heuristics flagged this ghost as potentially cheated.
     pub fn potentially_cheated_ghost(&self) -> bool {
         self.potentially_cheated_ghost
     }
 
+    /// Returns whether the Mii data in the ghost file has been replaced.
     pub fn has_mii_data_replaced(&self) -> bool {
         self.has_mii_data_replaced
     }
 
+    /// Returns whether the player name in the ghost file has been replaced.
     pub fn has_name_replaced(&self) -> bool {
         self.has_name_replaced
     }
 
+    /// Returns whether the player respawned at any point during the run.
     pub fn respawns(&self) -> bool {
         self.respawns
     }
 
+    /// Returns the run category as determined by CTGP's metadata.
     pub fn category(&self) -> Category {
         self.category
     }
 
+    /// Returns the footer format version number.
     pub fn footer_version(&self) -> u8 {
         self.footer_version
     }
 
-    /// Returns length of CTGP footer excluding file CRC32
+    /// Returns the length of the CTGP footer in bytes, excluding the trailing CRC32.
     pub fn len(&self) -> usize {
         self.len
     }
 
+    /// Returns `true` if the footer has zero length.
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
 }
 
-/// Used with a face button byte
+/// Returns `true` if the given face-button byte indicates a CTGP pause event.
+///
+/// CTGP encodes pauses in bit 6 (`0x40`) of the face-button input byte.
 fn contains_ctgp_pause(buttons: u8) -> bool {
     buttons & 0x40 != 0
 }
