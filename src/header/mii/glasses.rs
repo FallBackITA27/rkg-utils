@@ -44,6 +44,30 @@ impl Glasses {
     pub fn glasses_color(&self) -> GlassesColor {
         self.glasses_color
     }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), GlassesError> {
+        if y > 20 {
+            return Err(GlassesError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), GlassesError> {
+        if size > 7 {
+            return Err(GlassesError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
+
+    pub fn set_glasses_type(&mut self, glasses_type: GlassesType) {
+        self.glasses_type = glasses_type;
+    }
+
+    pub fn set_glasses_color(&mut self, glasses_color: GlassesColor) {
+        self.glasses_color = glasses_color;
+    }
 }
 
 impl FromByteHandler for Glasses {

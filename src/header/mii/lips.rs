@@ -43,6 +43,30 @@ impl Lips {
     pub fn lips_color(&self) -> LipsColor {
         self.lips_color
     }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), LipsError> {
+        if y > 18 {
+            return Err(LipsError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), LipsError> {
+        if size > 8 {
+            return Err(LipsError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
+
+    pub fn set_lips_type(&mut self, lips_type: LipsType) {
+        self.lips_type = lips_type;
+    }
+
+    pub fn set_lips_color(&mut self, lips_color: LipsColor) {
+        self.lips_color = lips_color;
+    }
 }
 
 impl FromByteHandler for Lips {

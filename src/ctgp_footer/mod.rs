@@ -18,6 +18,8 @@ pub enum CTGPFooterError {
     InvalidFooterVersion,
     #[error("Try From Slice Error: {0}")]
     TryFromSliceError(#[from] std::array::TryFromSliceError),
+    #[error("Lap split index not semantically valid")]
+    LapSplitIndexError,
     #[error("Category Error: {0}")]
     CategoryError(#[from] category::CategoryError),
     #[error("In Game Time Error: {0}")]
@@ -63,7 +65,7 @@ pub struct CTGPFooter {
 impl CTGPFooter {
     /// Expects full rkg data
     pub fn new(data: &[u8]) -> Result<Self, CTGPFooterError> {
-        if data[data.len() - 0x08..data.len() - 0x04] != [0x43, 0x4B, 0x47, 0x44] {
+        if data[data.len() - 0x08..data.len() - 0x04] != *b"CKGD" {
             return Err(CTGPFooterError::NotCKGD);
         }
 
@@ -90,15 +92,11 @@ impl CTGPFooter {
         let security_data = Vec::from(&metadata[..security_data_size]);
         current_offset += security_data_size;
 
-        let mut track_sha1 = [0; 0x14];
-        let track_sha1_offset = current_offset;
-        for (index, byte) in metadata[track_sha1_offset..track_sha1_offset + 0x14]
-            .iter()
-            .enumerate()
-        {
-            track_sha1[index] = *byte;
-            current_offset += 0x01;
-        }
+        let track_sha1 = metadata[current_offset..current_offset + 0x14]
+            .to_owned()
+            .try_into()
+            .unwrap();
+        current_offset += 0x14;
 
         let ghost_sha1 = compute_sha1_hex(data);
 
@@ -356,6 +354,13 @@ impl CTGPFooter {
         &self.exact_lap_times[0..self.lap_count as usize]
     }
 
+    pub fn exact_lap_time(&self, idx: usize) -> Result<ExactFinishTime, CTGPFooterError> {
+        if idx >= self.lap_count as usize {
+            return Err(CTGPFooterError::LapSplitIndexError);
+        }
+        Ok(self.exact_lap_times[idx])
+    }
+
     pub fn rtc_race_end(&self) -> NaiveDateTime {
         self.rtc_race_end
     }
@@ -445,7 +450,7 @@ impl CTGPFooter {
         self.footer_version
     }
 
-    /// Returns length of CTGP footer excluding the CRC-32 at the end of the file
+    /// Returns length of CTGP footer excluding file CRC32
     pub fn len(&self) -> usize {
         self.len
     }

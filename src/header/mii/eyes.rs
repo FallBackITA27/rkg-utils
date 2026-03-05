@@ -62,6 +62,46 @@ impl Eyes {
     pub fn eye_type(&self) -> EyeType {
         self.eye_type
     }
+
+    pub fn set_rotation(&mut self, rotation: u8) -> Result<(), EyesError> {
+        if rotation > 7 {
+            return Err(EyesError::RotationInvalid);
+        }
+        self.rotation = rotation;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), EyesError> {
+        if size > 7 {
+            return Err(EyesError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
+
+    pub fn set_x(&mut self, x: u8) -> Result<(), EyesError> {
+        if x > 12 {
+            return Err(EyesError::XInvalid);
+        }
+        self.x = x;
+        Ok(())
+    }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), EyesError> {
+        if y > 18 {
+            return Err(EyesError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_eye_color(&mut self, eye_color: EyeColor) {
+        self.eye_color = eye_color;
+    }
+
+    pub fn set_eye_type(&mut self, eye_type: EyeType) {
+        self.eye_type = eye_type;
+    }
 }
 
 #[derive(thiserror::Error, Debug)]

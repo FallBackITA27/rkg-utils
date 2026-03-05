@@ -35,8 +35,25 @@ impl Build {
     pub fn height(&self) -> u8 {
         self.height
     }
+
+    pub fn set_height(&mut self, height: u8) -> Result<(), BuildError> {
+        if height > 127 {
+            return Err(BuildError::HeightInvalid);
+        }
+        self.height = height;
+        Ok(())
+    }
+
     pub fn weight(&self) -> u8 {
         self.weight
+    }
+
+    pub fn set_weight(&mut self, weight: u8) -> Result<(), BuildError> {
+        if weight > 127 {
+            return Err(BuildError::WeightInvalid);
+        }
+        self.height = weight;
+        Ok(())
     }
 }
 

@@ -30,7 +30,7 @@ use crate::{
     },
     input_data::{InputData, yaz1_compress, yaz1_decompress},
 };
-use std::{fs, io::Read};
+use std::io::Read;
 
 #[test]
 fn test_rkg_header() {
@@ -601,7 +601,7 @@ fn test_full_ghost() {
     );
 
     // CTGP Metadata
-    assert!(ghost.ctgp_metadata().is_some());
+    assert!(ghost.ctgp_footer().is_some());
 }
 
 #[test]
@@ -937,9 +937,11 @@ fn write_to_ghost() {
 /*
 #[test]
 fn bulk_ghost_collection() {
-    for entry in fs::read_dir("./test_ghosts/ctgp_ghost_collection").unwrap() {
+    for entry in std::fs::read_dir("./test_ghosts/ctgp_ghost_collection").unwrap() {
         let ghost = Ghost::new_from_file(entry.as_ref().unwrap().path())
             .expect(format!("Failed on ghost {:?}", entry.as_ref().unwrap().file_name()).as_str());
+        assert!(ghost.verify_base_crc32());
+        assert!(ghost.verify_file_crc32());
     }
 }
 */
@@ -963,7 +965,61 @@ fn test_compare_saved_ghost() {
     );
     assert_eq!(ghost1.file_crc32(), ghost2.file_crc32());
     assert_eq!(
-        ghost1.ctgp_metadata().as_ref().unwrap().raw_data(),
-        ghost2.ctgp_metadata().as_ref().unwrap().raw_data()
+        ghost1.ctgp_footer().as_ref().unwrap().raw_data(),
+        ghost2.ctgp_footer().as_ref().unwrap().raw_data()
     );
+}
+
+#[test]
+fn test_sp_footer() {
+    let ghost = Ghost::new_from_file("./test_ghosts/spv5.rkg").unwrap();
+
+    let sp_footer = ghost.sp_footer().unwrap();
+
+    println!("SP footer version: {}", sp_footer.footer_version());
+    print!("Possible MKW-SP release versions: ");
+    if let Some(sp_versions) = sp_footer.possible_sp_versions() {
+        for version in sp_versions {
+            print!("{}, ", version)
+        }
+        println!();
+    } else {
+        println!("Unknown")
+    }
+
+    print!("Track SHA1: ");
+    for byte in sp_footer.track_sha1().iter() {
+        print!("{:02X}", *byte);
+    }
+    println!();
+
+    for (index, time) in sp_footer.exact_lap_times().iter().enumerate() {
+        println!("Lap {}: {}", index + 1, time);
+    }
+    println!("Total: {}", sp_footer.exact_finish_time());
+    println!("Has speed mod? {}", sp_footer.has_speed_mod());
+    println!("Has ultra shortcut? {}", sp_footer.has_ultra_shortcut());
+    println!(
+        "Has horizontal wall glitch? {}",
+        sp_footer.has_horizontal_wall_glitch()
+    );
+    println!("Has wallride? {}", sp_footer.has_wallride());
+
+    if let Some(shroomstrat_string) = sp_footer.shroomstrat_string() {
+        println!("Shroomstrat: {}", shroomstrat_string);
+    }
+
+    if let Some(is_vanilla) = sp_footer.is_vanilla_mode_enabled() {
+        println!("Vanilla mode enabled? {}", is_vanilla);
+    }
+
+    if let Some(simplified_controls) = sp_footer.has_simplified_controls() {
+        println!("Has simplified controls? {}", simplified_controls);
+    }
+
+    if let Some(set_in_mirror) = sp_footer.set_in_mirror() {
+        println!("Set in mirror mode? {}", set_in_mirror);
+    }
+
+    assert!(ghost.verify_file_crc32());
 }

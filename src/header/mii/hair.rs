@@ -27,6 +27,18 @@ impl Hair {
     pub fn is_flipped(&self) -> bool {
         self.is_flipped
     }
+
+    pub fn set_hair_type(&mut self, hair_type: HairType) {
+        self.hair_type = hair_type;
+    }
+
+    pub fn set_hair_color(&mut self, hair_color: HairColor) {
+        self.hair_color = hair_color;
+    }
+
+    pub fn set_is_flipped(&mut self, is_flipped: bool) {
+        self.is_flipped = is_flipped;
+    }
 }
 
 #[derive(thiserror::Error, Debug)]

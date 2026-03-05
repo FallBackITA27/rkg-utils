@@ -44,8 +44,8 @@ impl InGameTime {
         self.minutes > 5 || self.seconds > 59 || self.milliseconds > 999
     }
 
-    pub fn igt_to_millis(self) -> i32 {
-        (self.milliseconds as i32) + (self.seconds as i32) * 1000 + (self.minutes as i32) * 60000
+    pub fn igt_to_millis(self) -> u32 {
+        (self.milliseconds as u32) + (self.seconds as u32) * 1000 + (self.minutes as u32) * 60000
     }
 }
 
@@ -83,5 +83,26 @@ impl FromByteHandler for InGameTime {
             seconds,
             milliseconds: handler.copy_word(0) & 0x3FF,
         })
+    }
+}
+
+impl std::ops::Add for InGameTime {
+    type Output = InGameTime;
+
+    fn add(self, rhs: InGameTime) -> InGameTime {
+        let total_millis = self.igt_to_millis() + rhs.igt_to_millis();
+
+        let milliseconds = (total_millis % 1000) as u16;
+        let total_seconds = total_millis / 1000;
+        let seconds = (total_seconds % 60) as u8;
+        let minutes = (total_seconds / 60) as u8;
+
+        InGameTime::new(minutes, seconds, milliseconds)
+    }
+}
+
+impl std::iter::Sum for InGameTime {
+    fn sum<I: Iterator<Item = InGameTime>>(iter: I) -> Self {
+        iter.fold(InGameTime::default(), |a, b| a + b)
     }
 }

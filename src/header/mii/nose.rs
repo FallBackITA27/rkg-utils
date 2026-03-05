@@ -30,6 +30,26 @@ impl Nose {
     pub fn nose_type(&self) -> NoseType {
         self.nose_type
     }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), NoseError> {
+        if y > 18 {
+            return Err(NoseError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), NoseError> {
+        if size > 8 {
+            return Err(NoseError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
+
+    pub fn set_nose_type(&mut self, nose_type: NoseType) {
+        self.nose_type = nose_type;
+    }
 }
 
 impl FromByteHandler for Nose {

@@ -41,6 +41,18 @@ impl Head {
     pub fn face_features(&self) -> FaceFeatures {
         self.face_features
     }
+
+    pub fn set_shape(&mut self, shape: HeadShape) {
+        self.shape = shape;
+    }
+
+    pub fn set_skin_tone(&mut self, skin_tone: SkinTone) {
+        self.skin_tone = skin_tone;
+    }
+
+    pub fn set_face_features(&mut self, face_features: FaceFeatures) {
+        self.face_features = face_features;
+    }
 }
 
 impl FromByteHandler for Head {

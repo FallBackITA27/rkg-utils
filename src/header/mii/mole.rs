@@ -40,6 +40,34 @@ impl Mole {
     pub fn size(&self) -> u8 {
         self.size
     }
+
+    pub fn set_has_mole(&mut self, has_mole: bool) {
+        self.has_mole = has_mole;
+    }
+
+    pub fn set_x(&mut self, x: u8) -> Result<(), MoleError> {
+        if x > 16 {
+            return Err(MoleError::XInvalid);
+        }
+        self.x = x;
+        Ok(())
+    }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), MoleError> {
+        if y > 30 {
+            return Err(MoleError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), MoleError> {
+        if size > 8 {
+            return Err(MoleError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
 }
 impl FromByteHandler for Mole {
     type Err = MoleError;

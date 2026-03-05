@@ -65,6 +65,46 @@ impl Eyebrows {
     pub fn eyebrow_type(&self) -> EyebrowType {
         self.eyebrow_type
     }
+
+    pub fn set_rotation(&mut self, rotation: u8) -> Result<(), EyebrowsError> {
+        if rotation > 11 {
+            return Err(EyebrowsError::RotationInvalid);
+        }
+        self.rotation = rotation;
+        Ok(())
+    }
+
+    pub fn set_size(&mut self, size: u8) -> Result<(), EyebrowsError> {
+        if size > 8 {
+            return Err(EyebrowsError::SizeInvalid);
+        }
+        self.size = size;
+        Ok(())
+    }
+
+    pub fn set_x(&mut self, x: u8) -> Result<(), EyebrowsError> {
+        if x > 12 {
+            return Err(EyebrowsError::XInvalid);
+        }
+        self.x = x;
+        Ok(())
+    }
+
+    pub fn set_y(&mut self, y: u8) -> Result<(), EyebrowsError> {
+        if !(3..=18).contains(&y) {
+            return Err(EyebrowsError::YInvalid);
+        }
+        self.y = y;
+        Ok(())
+    }
+
+    pub fn set_eyebrow_color(&mut self, eyebrow_color: HairColor) {
+        self.eyebrow_color = eyebrow_color;
+    }
+
+    pub fn set_eyebrow_type(&mut self, eyebrow_type: EyebrowType) {
+        self.eyebrow_type = eyebrow_type;
+    }
 }
 
 #[derive(thiserror::Error, Debug)]

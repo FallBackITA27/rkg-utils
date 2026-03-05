@@ -52,6 +52,34 @@ impl FacialHair {
     pub fn mustache_y(&self) -> u8 {
         self.mustache_y
     }
+
+    pub fn set_beard_type(&mut self, beard_type: BeardType) {
+        self.beard_type = beard_type;
+    }
+
+    pub fn set_mustache_type(&mut self, mustache_type: MustacheType) {
+        self.mustache_type = mustache_type;
+    }
+
+    pub fn set_color(&mut self, color: HairColor) {
+        self.color = color;
+    }
+
+    pub fn set_mustache_size(&mut self, mustache_size: u8) -> Result<(), FacialHairError> {
+        if mustache_size > 8 {
+            return Err(FacialHairError::SizeInvalid);
+        }
+        self.mustache_size = mustache_size;
+        Ok(())
+    }
+
+    pub fn set_mustache_y(&mut self, mustache_y: u8) -> Result<(), FacialHairError> {
+        if mustache_y > 16 {
+            return Err(FacialHairError::YInvalid);
+        }
+        self.mustache_y = mustache_y;
+        Ok(())
+    }
 }
 
 impl FromByteHandler for FacialHair {

@@ -116,8 +116,8 @@ impl Header {
             ByteHandler::try_from(&header_data[0x0E..=0x0F])?.copy_word(0);
 
         let lap_count = header_data[0x10];
-        let mut lap_split_times: [InGameTime; 11] = [Default::default(); 11];
-        for index in 0..10 {
+        let mut lap_split_times = [InGameTime::default(); 11];
+        for index in 0..lap_count {
             let start = (0x11 + index * 3) as usize;
             lap_split_times[index as usize] =
                 InGameTime::from_byte_handler(&header_data[start..start + 3])?;

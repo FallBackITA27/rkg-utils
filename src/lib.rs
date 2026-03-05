@@ -11,6 +11,7 @@ use crate::{
     ctgp_footer::CTGPFooter,
     header::{Header, mii::Mii},
     input_data::InputData,
+    sp_footer::SPFooter,
 };
 
 pub mod byte_handler;
@@ -18,12 +19,14 @@ pub mod crc;
 pub mod ctgp_footer;
 pub mod header;
 pub mod input_data;
+pub mod sp_footer;
 
 /*
  * TODO:
  * Unfinished/unimplemented functionality
  * ----------------------------------------------
  * Implement MKW-SP footer support
+ * Implement setters for Mii substructs' members
  * Implement TryFrom<_> for T where T: Into<ByteHandler>, relies on https://github.com/rust-lang/rust/issues/31844 currently
  * Represent at a Type-system level which types can convert from T to TypeHandler to whichever Struct
  * Optimize Little-Endian calculations
@@ -56,9 +59,10 @@ pub struct Ghost {
     header: Header,
     input_data: InputData,
     base_crc32: u32,
-    ctgp_metadata: Option<CTGPFooter>,
+    ctgp_footer: Option<CTGPFooter>,
+    sp_footer: Option<SPFooter>,
     file_crc32: u32,
-    should_preserve_external_metadata: bool,
+    should_preserve_external_footer: bool,
 }
 
 impl Ghost {
@@ -72,16 +76,25 @@ impl Ghost {
         let header = Header::new(&bytes[..0x88])?;
 
         let file_crc32 = u32::from_be_bytes(bytes[bytes.len() - 0x04..].try_into()?);
-        let base_crc32;
+        let mut base_crc32 = file_crc32;
 
-        let ctgp_metadata = if let Ok(ctgp_metadata) = CTGPFooter::new(bytes) {
-            let input_data_end_offset = bytes.len() - ctgp_metadata.len() - 0x08;
+        let ctgp_footer = if let Ok(ctgp_footer) = CTGPFooter::new(bytes) {
+            let input_data_end_offset = bytes.len() - ctgp_footer.len() - 0x08;
             base_crc32 = u32::from_be_bytes(
                 bytes[input_data_end_offset..input_data_end_offset + 0x04].try_into()?,
             );
-            Some(ctgp_metadata)
+            Some(ctgp_footer)
         } else {
-            base_crc32 = file_crc32;
+            None
+        };
+
+        let sp_footer = if let Ok(sp_footer) = SPFooter::new(bytes) {
+            let input_data_end_offset = bytes.len() - sp_footer.len() - 0x08;
+            base_crc32 = u32::from_be_bytes(
+                bytes[input_data_end_offset..input_data_end_offset + 0x04].try_into()?,
+            );
+            Some(sp_footer)
+        } else {
             None
         };
 
@@ -98,9 +111,10 @@ impl Ghost {
             header,
             input_data,
             base_crc32,
-            ctgp_metadata,
+            ctgp_footer,
+            sp_footer,
             file_crc32,
-            should_preserve_external_metadata: true,
+            should_preserve_external_footer: true,
         })
     }
 
@@ -138,22 +152,33 @@ impl Ghost {
         self.raw_data[..new_input_data_end].copy_from_slice(&buf[..new_input_data_end]);
         let base_crc32 = crc32(&buf);
 
-        if let Some(ctgp_metadata) = self.ctgp_metadata()
-            && self.should_preserve_external_metadata()
+        if let Some(ctgp_footer) = self.ctgp_footer()
+            && self.should_preserve_external_footer()
         {
             buf.extend_from_slice(&base_crc32.to_be_bytes());
-            buf.extend_from_slice(ctgp_metadata.raw_data());
+            buf.extend_from_slice(ctgp_footer.raw_data());
 
-            let metadata_len = ctgp_metadata.len();
+            let footer_len = ctgp_footer.len();
             self.raw_data.drain(new_input_data_end..);
             self.raw_data
-                .extend_from_slice(&buf[buf.len() - metadata_len - 0x04..]);
+                .extend_from_slice(&buf[buf.len() - footer_len - 0x04..]);
             self.raw_data.extend_from_slice(&[0u8; 4]);
-        } else if !self.should_preserve_external_metadata()
+        } else if let Some(sp_footer) = self.sp_footer()
+            && self.should_preserve_external_footer()
+        {
+            buf.extend_from_slice(&base_crc32.to_be_bytes());
+            buf.extend_from_slice(sp_footer.raw_data());
+
+            let footer_len = sp_footer.len();
+            self.raw_data.drain(new_input_data_end..);
+            self.raw_data
+                .extend_from_slice(&buf[buf.len() - footer_len - 0x04..]);
+            self.raw_data.extend_from_slice(&[0u8; 4]);
+        } else if !self.should_preserve_external_footer()
             && self.raw_data.len() >= new_input_data_end + 0x08
         {
             self.raw_data.drain(new_input_data_end + 0x04..);
-        } else if self.should_preserve_external_metadata()
+        } else if self.should_preserve_external_footer()
             && self.raw_data.len() >= new_input_data_end + 0x08
         {
             self.raw_data[new_input_data_end..new_input_data_end + 0x04]
@@ -165,8 +190,8 @@ impl Ghost {
         self.raw_data[len - 0x04..].copy_from_slice(&crc32.to_be_bytes());
 
         let sha1 = compute_sha1_hex(&self.raw_data);
-        if let Some(ctgp_metadata) = self.ctgp_metadata_mut() {
-            ctgp_metadata.set_ghost_sha1(&sha1)?;
+        if let Some(ctgp_footer) = self.ctgp_footer_mut() {
+            ctgp_footer.set_ghost_sha1(&sha1)?;
         }
 
         Ok(())
@@ -222,28 +247,43 @@ impl Ghost {
         &mut self.input_data
     }
 
-    pub fn ctgp_metadata(&self) -> Option<&CTGPFooter> {
-        self.ctgp_metadata.as_ref()
+    pub fn ctgp_footer(&self) -> Option<&CTGPFooter> {
+        self.ctgp_footer.as_ref()
     }
 
-    pub fn ctgp_metadata_mut(&mut self) -> Option<&mut CTGPFooter> {
-        self.ctgp_metadata.as_mut()
+    pub fn ctgp_footer_mut(&mut self) -> Option<&mut CTGPFooter> {
+        self.ctgp_footer.as_mut()
+    }
+
+    pub fn sp_footer(&self) -> Option<&SPFooter> {
+        self.sp_footer.as_ref()
     }
 
     pub fn base_crc32(&self) -> u32 {
         self.base_crc32
     }
 
+    pub fn verify_base_crc32(&self) -> bool {
+        let mut data = Vec::from(self.header().raw_data());
+        data.extend_from_slice(self.input_data().raw_data());
+        self.base_crc32 == crc32(&data)
+    }
+
     pub fn file_crc32(&self) -> u32 {
         self.file_crc32
     }
 
-    pub fn should_preserve_external_metadata(&self) -> bool {
-        self.should_preserve_external_metadata
+    pub fn verify_file_crc32(&self) -> bool {
+        let len = self.raw_data().len();
+        self.file_crc32 == crc32(&self.raw_data()[..len - 0x04])
     }
 
-    pub fn set_should_preserve_external_metadata(&mut self, b: bool) {
-        self.should_preserve_external_metadata = b;
+    pub fn should_preserve_external_footer(&self) -> bool {
+        self.should_preserve_external_footer
+    }
+
+    pub fn set_should_preserve_external_footer(&mut self, b: bool) {
+        self.should_preserve_external_footer = b;
     }
 }
 
