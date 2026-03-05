@@ -29,7 +29,6 @@ impl Location {
         self.version
     }
 
-
     /// Looks up a [`Location`] by country ID, subregion ID, and optional region version.
     ///
     /// If `version` is `None`, the lookup may return an adjusted match (i.e. the

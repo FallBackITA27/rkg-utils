@@ -148,27 +148,24 @@ impl SPFooter {
 
         // 0xXXXvsmXX
         let bools = ByteHandler::from(footer_data[current_offset]);
-        let is_vanilla_mode_enabled;
-        let has_simplified_controls;
-        let set_in_mirror;
 
-        if footer_version >= 3 {
-            is_vanilla_mode_enabled = Some(bools.read_bool(4));
+        let is_vanilla_mode_enabled = if footer_version >= 3 {
+            Some(bools.read_bool(4))
         } else {
-            is_vanilla_mode_enabled = None;
-        }
+            None
+        };
 
-        if footer_version >= 4 {
-            has_simplified_controls = Some(bools.read_bool(3));
+        let has_simplified_controls = if footer_version >= 4 {
+            Some(bools.read_bool(3))
         } else {
-            has_simplified_controls = None;
-        }
+            None
+        };
 
-        if footer_version >= 5 {
-            set_in_mirror = Some(bools.read_bool(2));
+        let set_in_mirror = if footer_version >= 5 {
+            Some(bools.read_bool(2))
         } else {
-            set_in_mirror = None;
-        }
+            None
+        };
 
         Ok(Self {
             raw_data: footer_data.to_owned(),
@@ -275,5 +272,10 @@ impl SPFooter {
     /// Returns length of footer excluding file CRC32
     pub fn len(&self) -> usize {
         self.len as usize
+    }
+
+    /// Returns `true` if the footer is empty
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
     }
 }

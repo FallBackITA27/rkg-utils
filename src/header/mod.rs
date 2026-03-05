@@ -1,5 +1,7 @@
 use crate::{
-    byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler}, crc::crc16, header::{
+    byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler},
+    crc::crc16,
+    header::{
         combo::{Combo, ComboError},
         controller::{Controller, ControllerError},
         date::{Date, DateError},
@@ -12,7 +14,8 @@ use crate::{
         mii::{Mii, MiiError},
         slot_id::{SlotId, SlotIdError},
         transmission_mod::{TransmissionMod, TransmissionModError},
-    }, write_bits
+    },
+    write_bits,
 };
 
 use std::io::Read;

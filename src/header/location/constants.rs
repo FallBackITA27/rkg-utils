@@ -16,7 +16,6 @@ pub enum SubregionError {
     CountryError(#[from] CountryError),
 }
 
-
 /// Represents the different Extended Region versions
 #[derive(Debug, PartialEq, Clone, Copy, PartialOrd, Eq, Ord)]
 pub enum Version {

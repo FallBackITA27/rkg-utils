@@ -198,7 +198,7 @@ impl CTGPFooter {
             current_offset -= 0x04;
         } else {
             // Infer that the core version is 1.03.0134, since the next batch of updates after TT release was CORE 1.03.0136
-            core_version = CTGPVersion::new(1, 3, 0134, None);
+            core_version = CTGPVersion::new(1, 3, 134, None);
             // Metadata version 2 was introduced in between the 1.03.1044 and 1046 update, so it must be 1.03.1044
             possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044, None)]));
             lap_split_suspicious_intersections = None;

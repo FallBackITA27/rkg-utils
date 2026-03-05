@@ -61,6 +61,7 @@ impl ExactFinishTime {
     /// # Examples
     ///
     /// ```
+    /// use rkg_utils::ctgp_footer::exact_finish_time::ExactFinishTime;
     /// let t = ExactFinishTime::new(1, 30, 500_000_000_000);
     /// assert_eq!(t.time_to_picoseconds(), 90_500_000_000_000);
     /// ```
@@ -76,6 +77,7 @@ impl ExactFinishTime {
 /// # Examples
 ///
 /// ```
+/// use rkg_utils::ctgp_footer::exact_finish_time::ExactFinishTime;
 /// let t = ExactFinishTime::new(1, 9, 123_456_789_000);
 /// assert_eq!(t.to_string(), "01:09.123456789000");
 /// ```

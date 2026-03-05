@@ -27,7 +27,7 @@ impl Birthday {
                 month: None,
                 day: None,
             }),
-            month if day == 0 => Err(BirthdayError::DayInvalid), // Birthday with only a month is not possible
+            _month if day == 0 => Err(BirthdayError::DayInvalid), // Birthday with only a month is not possible
             1 | 3 | 5 | 7 | 8 | 10 | 12 if day > 31 => Err(BirthdayError::DayInvalid),
             4 | 6 | 9 | 11 if day > 30 => Err(BirthdayError::DayInvalid),
             2 if day > 29 => Err(BirthdayError::DayInvalid),
