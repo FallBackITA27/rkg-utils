@@ -167,6 +167,7 @@ impl Header {
         self.raw_data[0x86..0x88].copy_from_slice(&self.mii_crc16.to_be_bytes());
     }
 
+    /// Getter
     pub fn raw_data(&self) -> &[u8; 0x88] {
         &self.raw_data
     }

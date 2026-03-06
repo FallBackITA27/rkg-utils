@@ -9,6 +9,8 @@ pub enum GhostTypeError {
     ByteHandlerError(#[from] ByteHandlerError),
 }
 
+/// All possible Ghost Types depending on slots
+///
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GhostType {
     PlayerBest,

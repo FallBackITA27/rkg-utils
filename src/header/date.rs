@@ -12,6 +12,8 @@ pub enum DateError {
     ByteHandlerError(#[from] ByteHandlerError),
 }
 
+/// All valid dates on the Wii. Year is a range between 0 and 35, symbolizing 2000 and 2035
+/// respectively.
 #[derive(Debug)]
 pub struct Date {
     year: u8,
