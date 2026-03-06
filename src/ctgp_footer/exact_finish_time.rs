@@ -109,7 +109,7 @@ impl std::ops::Add for ExactFinishTime {
 }
 
 /// Sums an iterator of [`ExactFinishTime`] values, starting from the default
-/// (zero) time and accumulating with [`Add`].
+/// (zero) time and accumulating with [`std::ops::Add`].
 impl std::iter::Sum for ExactFinishTime {
     fn sum<I: Iterator<Item = ExactFinishTime>>(iter: I) -> Self {
         iter.fold(ExactFinishTime::default(), |a, b| a + b)
