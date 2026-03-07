@@ -20,7 +20,7 @@ pub enum InputDataError {
 }
 
 /// Handles all input data being read
-/// Tockdom wiki: https://wiki.tockdom.com/wiki/RKG_(File_Format)#Controller_Input_Data
+/// Tockdom wiki: <https://wiki.tockdom.com/wiki/RKG_(File_Format)#Controller_Input_Data>
 pub struct InputData {
     raw_data: Vec<u8>,
     face_input_count: u16,
@@ -329,7 +329,7 @@ impl InputData {
 }
 
 /// Decompress YAZ1-compressed input data
-/// Adapted from https://github.com/AtishaRibeiro/InputDisplay/blob/master/InputDisplay/Core/Yaz1dec.cs
+/// Adapted from <https://github.com/AtishaRibeiro/InputDisplay/blob/master/InputDisplay/Core/Yaz1dec.cs>
 pub(crate) fn yaz1_decompress(data: &[u8]) -> Option<Vec<u8>> {
     // YAZ1 files start with "Yaz1" magic header
     if data.len() < 16 || &data[0..4] != b"Yaz1" {
@@ -427,7 +427,7 @@ fn decompress_block(src: &[u8], offset: usize, uncompressed_size: usize) -> Opti
 }
 
 /// Compress input data with Yaz1 compression
-/// Adapted from https://github.com/AtishaRibeiro/TT-Rec-Tools/blob/dev/ghostmanager/Scripts/YAZ1_comp.js
+/// Adapted from <https://github.com/AtishaRibeiro/TT-Rec-Tools/blob/dev/ghostmanager/Scripts/YAZ1_comp.js>
 pub(crate) fn yaz1_compress(src: &[u8]) -> Vec<u8> {
     // first remove padded 0s (decompressed input data is padded with 0s to 0x2774 bytes)
     let mut trailing_bytes_to_remove = 0usize;

@@ -11,6 +11,7 @@ pub enum InGameTimeError {
 }
 
 // Struct size is 32 bits, copy is fine
+/// Struct Representing Possible Times. Not all combinations are semantically correct.
 #[derive(Default, Clone, Copy)]
 pub struct InGameTime {
     minutes: u8,

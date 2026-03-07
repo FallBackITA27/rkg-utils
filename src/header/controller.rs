@@ -13,6 +13,7 @@ pub enum ControllerError {
     Infallible(#[from] Infallible),
 }
 
+/// All valid Controller IDs. TODO: distinction between GCN and USB GCN
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Controller {
     WiiWheel,

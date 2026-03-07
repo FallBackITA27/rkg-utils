@@ -91,7 +91,7 @@ pub trait GetWeightClass {
 }
 
 /// Enum with all valid characters
-/// Tockdom documentation: https://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
+/// Tockdom documentation: <https://wiki.tockdom.com/wiki/List_of_Identifiers#Characters>
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Character {
     Mario,
@@ -427,7 +427,7 @@ impl GetWeightClass for Character {
 }
 
 /// Enum with all valid vehicles
-/// https://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
+/// <https://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles>
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Vehicle {
     StandardKartS,

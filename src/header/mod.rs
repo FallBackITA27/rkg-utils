@@ -67,7 +67,7 @@ pub enum HeaderError {
 }
 
 /// All the data in the Header of an RKGD
-/// https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header
+/// <https://wiki.tockdom.com/wiki/RKG_(File_Format)#File_Header>
 pub struct Header {
     raw_data: [u8; 0x88],
     finish_time: InGameTime,
@@ -167,6 +167,7 @@ impl Header {
         self.raw_data[0x86..0x88].copy_from_slice(&self.mii_crc16.to_be_bytes());
     }
 
+    /// Getter
     pub fn raw_data(&self) -> &[u8; 0x88] {
         &self.raw_data
     }

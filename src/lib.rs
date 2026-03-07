@@ -1,3 +1,17 @@
+//! This crate is meant to be a library to completely and coherently access the data in RKGD files,
+//! Mario Kart Wii's native Ghost Data.
+//!
+//! Features:
+//! - [x] Reading and Writing Vanilla Game Data
+//! - [x] Reading and Writing CTGP Modified Data
+//! - [x] Reading and Writing Pulsar (Retro Rewind) Modified Data
+//! - [ ] Reading and Writing MKW-SP Modified Data
+//! - [ ] Implementing Setters for Mii Substructs
+//! - [ ] Implementing `TryFrom<_>` for T where T: `Into<ByteHandler>`, relies on <https://github.com/rust-lang/rust/issues/31844> currently
+//! - [ ] Represent at a Type-system level which types can convert from `T1` (Bytes) to `crate::byte_handler::ByteHandler` to `T2` (Typed Structs)
+//! - [ ] Optimize Little-Endian calculations with `crate::byte_handler::ByteHandler`
+//! - [ ] Figure out whether Big-Endian works with `crate::byte_handler::ByteHandler`
+
 use std::{
     array::TryFromSliceError,
     io::{Read, Write},
@@ -20,18 +34,6 @@ pub mod ctgp_footer;
 pub mod header;
 pub mod input_data;
 pub mod sp_footer;
-
-/*
- * TODO:
- * Unfinished/unimplemented functionality
- * ----------------------------------------------
- * Implement MKW-SP footer support
- * Implement setters for Mii substructs' members
- * Implement TryFrom<_> for T where T: Into<ByteHandler>, relies on https://github.com/rust-lang/rust/issues/31844 currently
- * Represent at a Type-system level which types can convert from T to TypeHandler to whichever Struct
- * Optimize Little-Endian calculations
- * Figure out whether Big-Endian works
- */
 
 #[cfg(test)]
 mod tests;
