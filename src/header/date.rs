@@ -12,7 +12,7 @@ pub enum DateError {
     /// The day is zero, or exceeds the maximum number of days for the given month and year.
     #[error("Day is invalid")]
     DayInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
 }

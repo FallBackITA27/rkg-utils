@@ -84,7 +84,7 @@ pub enum MiiError {
     /// A Mii type field could not be parsed.
     #[error("Mii Type Error: {0}")]
     MiiTypeError(#[from] MiiTypeError),
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// A file I/O operation failed.

@@ -9,7 +9,7 @@ pub enum ControllerError {
     /// The controller ID byte did not map to any known [`Controller`] variant.
     #[error("Nonexistent Controller ID")]
     NonexistentControllerID,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.

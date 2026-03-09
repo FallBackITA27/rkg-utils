@@ -1,6 +1,6 @@
 #[derive(thiserror::Error, Debug)]
 pub enum ByteHandlerError {
-    /// The input slice was longer than 4 bytes and cannot fit in a [`ByteHandler`].
+    /// The input slice was longer than 4 bytes and cannot fit in a `ByteHandler`.
     #[error("Couldn't convert type to ByteHandler: Too Long")]
     ConversionErrorTooLong,
 }

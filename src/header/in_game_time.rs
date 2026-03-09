@@ -8,7 +8,7 @@ pub enum InGameTimeError {
     /// The input iterator did not contain enough bytes to extract a time value.
     #[error("Insufficiently Long Iterator")]
     InsufficientlyLongIterator,
-    /// A [`ByteHandler`] operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
 }

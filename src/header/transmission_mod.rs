@@ -8,7 +8,7 @@ pub enum TransmissionModError {
     /// The transmission mod ID byte did not map to any known [`TransmissionMod`] variant.
     #[error("Invalid transmission mod ID")]
     InvalidTransmissionMod,
-    /// A [`ByteHandler`] operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.

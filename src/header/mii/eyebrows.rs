@@ -188,7 +188,7 @@ pub enum EyebrowsError {
     /// The horizontal position exceeds the maximum of 12.
     #[error("X position is invalid")]
     XInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -196,7 +196,7 @@ pub enum EyebrowsError {
     Infallible(#[from] Infallible),
 }
 
-/// Deserializes [`Eyebrows`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes [`Eyebrows`] from a `ByteHandler`.
 ///
 /// Extracts and unpacks the eyebrow type, color, horizontal position, vertical position,
 /// size, and rotation from the packed Mii binary format using a series of bit shifts and masks.

@@ -78,7 +78,7 @@ pub enum HeaderError {
     /// The subregion code could not be parsed.
     #[error("Subregion Error: {0}")]
     SubregionError(#[from] SubregionError),
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
 }

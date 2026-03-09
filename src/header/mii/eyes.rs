@@ -185,7 +185,7 @@ pub enum EyesError {
     /// The horizontal position exceeds the maximum of 12.
     #[error("X position is invalid")]
     XInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -193,7 +193,7 @@ pub enum EyesError {
     Infallible(#[from] Infallible),
 }
 
-/// Deserializes [`Eyes`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes [`Eyes`] from a `ByteHandler`.
 ///
 /// Extracts and unpacks the eye type, color, vertical position, rotation, horizontal
 /// position, and size from the packed Mii binary format using a series of bit shifts and masks.

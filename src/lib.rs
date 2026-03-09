@@ -55,7 +55,7 @@ pub enum GhostError {
     /// The CTGP footer could not be parsed.
     #[error("CTGP Footer Error: {0}")]
     CTGPFooterError(#[from] ctgp_footer::CTGPFooterError),
-    /// A [`ByteHandler`](byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler`(byte_handler::ByteHandler) operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] byte_handler::ByteHandlerError),
     /// A slice-to-array conversion failed (e.g. when extracting a CRC-32 word).

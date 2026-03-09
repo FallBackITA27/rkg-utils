@@ -8,7 +8,7 @@ pub enum FavoriteColorError {
     /// The color byte did not map to a known [`FavoriteColor`] variant.
     #[error("Color is invalid")]
     ColorInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -82,7 +82,7 @@ impl From<FavoriteColor> for u8 {
     }
 }
 
-/// Deserializes a [`FavoriteColor`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes a [`FavoriteColor`] from a `ByteHandler`.
 ///
 /// Expects byte `0x01` of the Mii data. The color index is extracted by shifting
 /// the byte right by 1 and masking the lower 4 bits.

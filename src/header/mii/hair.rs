@@ -70,7 +70,7 @@ pub enum HairError {
     /// The hair color byte did not map to a known [`HairColor`] variant.
     #[error("Color is invalid")]
     ColorInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -78,7 +78,7 @@ pub enum HairError {
     Infallible(#[from] Infallible),
 }
 
-/// Deserializes [`Hair`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes [`Hair`] from a `ByteHandler`.
 ///
 /// The handler is shifted right by 1 bit before extracting the flip flag,
 /// hair type, and hair color from the packed Mii binary format.

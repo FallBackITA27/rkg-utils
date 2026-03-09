@@ -11,7 +11,7 @@ pub enum BuildError {
     /// The height value exceeds the maximum allowed value of 127.
     #[error("Height is invalid")]
     HeightInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -90,7 +90,7 @@ impl Build {
     }
 }
 
-/// Deserializes a [`Build`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes a [`Build`] from a `ByteHandler`.
 ///
 /// The height is read from the first byte and the weight from the second byte.
 impl FromByteHandler for Build {

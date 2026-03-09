@@ -7,7 +7,7 @@ pub enum GhostTypeError {
     /// The ghost type byte did not map to any known [`GhostType`] variant.
     #[error("Nonexistent Ghost Type")]
     NonexistentGhostType,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
 }

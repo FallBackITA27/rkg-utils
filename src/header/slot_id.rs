@@ -9,7 +9,7 @@ pub enum SlotIdError {
     /// The slot ID byte did not map to any known [`SlotId`] variant.
     #[error("Non Existent Slot ID")]
     NonExistentSlotId,
-    /// A [`ByteHandler`] operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.

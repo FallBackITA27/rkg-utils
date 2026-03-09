@@ -126,7 +126,7 @@ impl FacialHair {
     }
 }
 
-/// Deserializes [`FacialHair`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes [`FacialHair`] from a `ByteHandler`.
 ///
 /// Extracts and unpacks the mustache vertical position, mustache size, facial hair color,
 /// mustache type, and beard type from the packed Mii binary format using bit shifts and masks.
@@ -171,7 +171,7 @@ pub enum FacialHairError {
     /// The mustache vertical position exceeds the maximum of 16.
     #[error("Y position is invalid")]
     YInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.

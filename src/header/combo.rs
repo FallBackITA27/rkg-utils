@@ -4,7 +4,7 @@ use std::fmt::Display;
 /// Represents a valid character and vehicle combination from a Mario Kart Wii RKG ghost file.
 ///
 /// A combo is only valid when the character and vehicle share the same [`WeightClass`].
-/// Construction via [`Combo::new`] or [`FromByteHandler`] enforces this constraint.
+/// Construction via [`Combo::new`] enforces this constraint.
 pub struct Combo {
     /// The character used in the run.
     character: Character,
@@ -37,7 +37,7 @@ pub enum ComboError {
     /// The character ID corresponds to a character that cannot appear in ghost files.
     #[error("Impossible Character ID")]
     ImpossibleCharacterId,
-    /// A [`ByteHandler`] operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
 }
@@ -69,7 +69,7 @@ impl Combo {
     }
 }
 
-/// Deserializes a [`Combo`] from a [`ByteHandler`] containing 2 bytes at header offset `0x08..0x0A`.
+/// Deserializes a [`Combo`] from a `ByteHandler` containing 2 bytes at header offset `0x08..0x0A`.
 ///
 /// The bytes are packed as follows:
 /// ```text

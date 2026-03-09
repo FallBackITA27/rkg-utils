@@ -12,7 +12,7 @@ pub enum BirthdayError {
     /// number of days for the given month.
     #[error("Day is invalid")]
     DayInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
@@ -80,7 +80,7 @@ impl Birthday {
     }
 }
 
-/// Deserializes a [`Birthday`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes a [`Birthday`] from a `ByteHandler`.
 ///
 /// The handler is shifted right by 2 bits before extracting the month from the
 /// lower nibble of the first byte and the day from the upper 5 bits of the second byte.

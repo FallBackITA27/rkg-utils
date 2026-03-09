@@ -108,7 +108,7 @@ impl Glasses {
     }
 }
 
-/// Deserializes [`Glasses`] from a [`ByteHandler`](crate::byte_handler::ByteHandler).
+/// Deserializes [`Glasses`] from a `ByteHandler`.
 ///
 /// Extracts and unpacks the glasses type, vertical position, color, and size
 /// from the packed Mii binary format using bit shifts and masks.
@@ -148,7 +148,7 @@ pub enum GlassesError {
     /// The vertical position exceeds the maximum of 20.
     #[error("Y position is invalid")]
     YInvalid,
-    /// A [`ByteHandler`](crate::byte_handler::ByteHandler) operation failed.
+    /// A `ByteHandler` operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] ByteHandlerError),
     /// Infallible conversion error; cannot occur at runtime.
