@@ -2,7 +2,7 @@ use crate::{
     byte_handler::{ByteHandler, ByteHandlerError, FromByteHandler},
     crc::crc16,
     header::{
-        combo::{Combo, ComboError},
+        combo::{Combo, ComboError, transmission::Transmission},
         controller::{Controller, ControllerError},
         date::{Date, DateError},
         ghost_type::{GhostType, GhostTypeError},
@@ -467,6 +467,17 @@ impl Header {
     /// Returns the CRC-16 checksum of the embedded Mii data as stored in the header.
     pub fn mii_crc16(&self) -> u16 {
         self.mii_crc16
+    }
+
+    /// Returns the transmission of the combo adjusted depending on transmission mod.
+    pub const fn transmission_adjusted(&self) -> Transmission {
+        match self.transmission_mod {
+            TransmissionMod::Vanilla => self.combo.get_transmission(),
+            TransmissionMod::AllInside => Transmission::Inside,
+            TransmissionMod::AllOutside => Transmission::Outside,
+            TransmissionMod::AllBikeInside if self.combo.vehicle().is_bike() => Transmission::Inside,
+            TransmissionMod::AllBikeInside => Transmission::Outside,
+        }
     }
 }
 

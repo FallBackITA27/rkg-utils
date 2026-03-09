@@ -78,12 +78,12 @@ impl Combo {
     }
 
     /// Returns the character used in the run.
-    pub fn character(&self) -> Character {
+    pub const fn character(&self) -> Character {
         self.character
     }
 
     /// Returns the vehicle used in the run.
-    pub fn vehicle(&self) -> Vehicle {
+    pub const fn vehicle(&self) -> Vehicle {
         self.vehicle
     }
 }
