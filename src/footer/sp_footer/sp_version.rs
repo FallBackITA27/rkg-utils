@@ -32,7 +32,7 @@ impl SPVersion {
     /// # Examples
     ///
     /// ```
-    /// use rkg_utils::sp_footer::sp_version::SPVersion;
+    /// use rkg_utils::footer::sp_footer::sp_version::SPVersion;
     ///
     /// // Unambiguous mapping
     /// let versions = SPVersion::from(0).unwrap();

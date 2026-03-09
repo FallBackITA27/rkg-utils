@@ -1,8 +1,7 @@
 use crate::{
     byte_handler::{ByteHandler, FromByteHandler},
-    ctgp_footer::exact_finish_time::ExactFinishTime,
+    footer::{ctgp_footer::exact_finish_time::ExactFinishTime, sp_footer::sp_version::SPVersion},
     header::in_game_time::{InGameTime, InGameTimeError},
-    sp_footer::sp_version::SPVersion,
 };
 
 pub mod sp_version;

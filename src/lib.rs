@@ -21,18 +21,16 @@ use sha1::{Digest, Sha1};
 
 use crate::{
     crc::crc32,
-    ctgp_footer::CTGPFooter,
+    footer::{FooterType, ctgp_footer::CTGPFooter, sp_footer::SPFooter},
     header::{Header, mii::Mii},
     input_data::InputData,
-    sp_footer::SPFooter,
 };
 
 pub mod byte_handler;
 pub mod crc;
-pub mod ctgp_footer;
+pub mod footer;
 pub mod header;
 pub mod input_data;
-pub mod sp_footer;
 
 #[cfg(test)]
 mod tests;
@@ -54,7 +52,7 @@ pub enum GhostError {
     InputDataError(#[from] input_data::InputDataError),
     /// The CTGP footer could not be parsed.
     #[error("CTGP Footer Error: {0}")]
-    CTGPFooterError(#[from] ctgp_footer::CTGPFooterError),
+    CTGPFooterError(#[from] footer::ctgp_footer::CTGPFooterError),
     /// A `ByteHandler`(byte_handler::ByteHandler) operation failed.
     #[error("ByteHandler Error: {0}")]
     ByteHandlerError(#[from] byte_handler::ByteHandlerError),
@@ -64,26 +62,6 @@ pub enum GhostError {
     /// A file I/O operation failed.
     #[error("IO Error: {0}")]
     IOError(#[from] std::io::Error),
-}
-
-pub enum FooterType {
-    CTGPFooter(CTGPFooter),
-    SPFooter(SPFooter),
-}
-
-impl FooterType {
-    pub fn is_ctgp(&self) -> bool {
-        matches!(self, Self::CTGPFooter(_))
-    }
-    pub fn is_sp(&self) -> bool {
-        matches!(self, Self::SPFooter(_))
-    }
-    pub fn raw_data(&self) -> &[u8] {
-        match self {
-            Self::CTGPFooter(footer) => footer.raw_data(),
-            Self::SPFooter(footer) => footer.raw_data()
-        }
-    }
 }
 
 /// A fully parsed Mario Kart Wii RKG ghost file.
@@ -104,6 +82,7 @@ pub struct Ghost {
     base_crc32: u32,
     /// The footer appended to the file, if present.
     footer: Option<FooterType>,
+    /// The file's crc 32
     file_crc32: u32,
     /// When `true`, any existing external footer is preserved when saving (including footer data from any mods that this crate doesn't support).
     should_preserve_external_footer: bool,

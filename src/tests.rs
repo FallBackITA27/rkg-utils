@@ -1,7 +1,9 @@
 use chrono::NaiveDateTime;
 
 use crate::{
-    FooterType, Ghost, ctgp_footer::CTGPFooter, header::{
+    Ghost,
+    footer::{FooterType, ctgp_footer::CTGPFooter},
+    header::{
         Header,
         combo::{Character, Combo, Vehicle},
         controller::Controller,
@@ -25,7 +27,8 @@ use crate::{
             nose::{Nose, NoseType},
         },
         slot_id::SlotId,
-    }, input_data::{InputData, yaz1_compress, yaz1_decompress}
+    },
+    input_data::{InputData, yaz1_compress, yaz1_decompress},
 };
 use std::io::Read;
 
@@ -971,7 +974,11 @@ fn test_compare_saved_ghost() {
 fn test_sp_footer() {
     let ghost = Ghost::new_from_file("./test_ghosts/spv5.rkg").unwrap();
 
-    let sp_footer = if let Some(FooterType::SPFooter(sp_footer)) = ghost.footer() { sp_footer } else { panic!("SP Footer not found") };
+    let sp_footer = if let Some(FooterType::SPFooter(sp_footer)) = ghost.footer() {
+        sp_footer
+    } else {
+        panic!("SP Footer not found")
+    };
 
     println!("SP footer version: {}", sp_footer.footer_version());
     print!("Possible MKW-SP release versions: ");
