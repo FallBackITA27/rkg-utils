@@ -1,3 +1,4 @@
+use std::fmt::Write;
 use crate::byte_handler::FromByteHandler;
 use crate::footer::ctgp_footer::{
     category::Category, ctgp_version::CTGPVersion, exact_finish_time::ExactFinishTime,
@@ -496,15 +497,13 @@ impl CTGPFooter {
     /// For example, a three-lap run with one mushroom on lap 1 and two on lap 3
     /// would return `"1-0-2"`.
     pub fn shroomstrat_string(&self) -> String {
-        let mut s = String::new();
+        let mut shroomstrat = self.shroomstrat().iter();
 
-        for (idx, lap) in self.shroomstrat().iter().enumerate() {
-            s += lap.to_string().as_str();
-
-            if idx + 1 < self.lap_count as usize {
-                s += "-";
-            }
+        let mut s = shroomstrat.next().unwrap().to_string();
+        for lap_shrooms in shroomstrat {
+            write!(s, "-{lap_shrooms}").unwrap()
         }
+
         s
     }
 
