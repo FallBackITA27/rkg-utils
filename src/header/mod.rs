@@ -475,7 +475,9 @@ impl Header {
             TransmissionMod::Vanilla => self.combo.get_transmission(),
             TransmissionMod::AllInside => Transmission::Inside,
             TransmissionMod::AllOutside => Transmission::Outside,
-            TransmissionMod::AllBikeInside if self.combo.vehicle().is_bike() => Transmission::Inside,
+            TransmissionMod::AllBikeInside if self.combo.vehicle().is_bike() => {
+                Transmission::Inside
+            }
             TransmissionMod::AllBikeInside => Transmission::Outside,
         }
     }

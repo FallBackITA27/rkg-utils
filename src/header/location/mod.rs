@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::header::location::constants::{Country, LocationFinder, Subregion, Version};
 
 pub mod constants;
@@ -85,5 +87,21 @@ impl Default for Location {
             subregion: Subregion::NotSet,
             version: Version::Vanilla,
         }
+    }
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Version::Vanilla => "Vanilla",
+                Version::ER10 => "Extended Regions 1.0",
+                Version::ER11 => "Extended Regions 1.1",
+                Version::ER12 => "Extended Regions 1.2",
+                Version::ER13 => "Extended Regions 1.3",
+            }
+        )
     }
 }
