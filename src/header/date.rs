@@ -108,6 +108,13 @@ impl FromByteHandler for Date {
     }
 }
 
+/// Formats [`Date`] as YYYY-MM-DD
+impl std::fmt::Display for Date {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "20{:02}-{:02}-{:02}", self.year, self.month, self.day)
+    }
+}
+
 /// Two [`Date`] values are equal if their year, month, and day are all identical.
 impl PartialEq for Date {
     fn eq(&self, other: &Self) -> bool {

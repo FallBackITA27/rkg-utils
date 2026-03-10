@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// Error type for CTGP category-related failures
 #[derive(thiserror::Error, Debug)]
 pub enum CategoryError {
@@ -96,6 +98,29 @@ impl Category {
             0x27 => Ok(Self::NoShortcut200ccTAS),
 
             _ => Err(CategoryError::NonexistentCategory),
+        }
+    }
+}
+
+impl Display for Category {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NoShortcut => write!(f, "No Shortcut"),
+            Self::Normal => write!(f, "Normal"),
+            Self::Shortcut => write!(f, "Shortcut"),
+            Self::Glitch => write!(f, "Glitch"),
+            Self::NoShortcutTAS => write!(f, "No Shortcut TAS"),
+            Self::NormalTAS => write!(f, "Normal TAS"),
+            Self::ShortcutTAS => write!(f, "Shortcut TAS"),
+            Self::GlitchTAS => write!(f, "Glitch TAS"),
+            Self::NoShortcut200cc => write!(f, "No Shortcut 200cc"),
+            Self::Normal200cc => write!(f, "Normal 200cc"),
+            Self::Shortcut200cc => write!(f, "Shortcut 200cc"),
+            Self::Glitch200cc => write!(f, "Glitch 200cc"),
+            Self::NoShortcut200ccTAS => write!(f, "No Shortcut 200cc TAS"),
+            Self::Normal200ccTAS => write!(f, "Normal 200cc TAS"),
+            Self::Shortcut200ccTAS => write!(f, "Shortcut 200cc TAS"),
+            Self::Glitch200ccTAS => write!(f, "Glitch 200cc TAS"),
         }
     }
 }

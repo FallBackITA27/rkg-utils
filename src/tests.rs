@@ -5,7 +5,7 @@ use crate::{
     footer::{FooterType, ctgp_footer::CTGPFooter},
     header::{
         Header,
-        combo::{Character, Combo, Vehicle},
+        combo::{Combo, character::Character, vehicle::Vehicle},
         controller::Controller,
         date::Date,
         ghost_type::GhostType,

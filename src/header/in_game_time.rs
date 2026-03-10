@@ -46,6 +46,19 @@ impl InGameTime {
         }
     }
 
+    /// Creates a new, valid [`InGameTime`] from milliseconds.
+    pub fn from_milliseconds(milliseconds: u32) -> Self {
+        let millis = (milliseconds % 1000) as u16;
+        let seconds = ((milliseconds / 1000) % 60) as u8;
+        let minutes = ((milliseconds / 60000) % 60) as u8;
+
+        Self {
+            minutes,
+            seconds,
+            milliseconds: millis,
+        }
+    }
+
     /// Returns the minutes component of the time.
     pub fn minutes(self) -> u8 {
         self.minutes
