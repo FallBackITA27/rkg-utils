@@ -6,4 +6,4 @@ Rust crate meant to parse and modify Mario Kart Wii RKG ghost files. Supports th
 This project is always open to contribution! Contact `@skylardabest339` on Discord for any bugs/issues with the crate.
 
 ## License
-This project is licensed under [MIT](https://opensource.org/license/mit) OR [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+This project is licensed under the [GNU General Public License 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
