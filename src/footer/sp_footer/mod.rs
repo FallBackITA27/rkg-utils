@@ -150,7 +150,7 @@ impl SPFooter {
         let mut subtraction_ps = 0i64;
 
         for exact_lap_time in exact_lap_times.iter_mut().take(lap_count as usize) {
-            let mut true_time_subtraction = ((f32::from_be_bytes(
+            let mut true_time_ps_subtraction = ((f32::from_be_bytes(
                 footer_data[current_offset..current_offset + 0x04].try_into()?,
             ) as f64)
                 * 1e+9)
@@ -162,18 +162,24 @@ impl SPFooter {
 
             // subtract the sum of the previous laps' difference because the lap differences add up to
             // have its decimal portion be equal to the total time
-            true_time_subtraction -= previous_subtractions;
+            true_time_ps_subtraction -= previous_subtractions;
 
-            if true_time_subtraction > 1e+9 as i64 {
-                true_time_subtraction -= subtraction_ps;
+            if true_time_ps_subtraction > 1e+9 as i64 {
+                true_time_ps_subtraction -= subtraction_ps;
                 subtraction_ps = if subtraction_ps == 0 { 1e+9 as i64 } else { 0 };
             }
-            previous_subtractions += true_time_subtraction;
-            *exact_lap_time = ExactFinishTime::new(
-                lap_time.minutes(),
-                lap_time.seconds(),
-                (lap_time.milliseconds() as i64 * 1e+9 as i64 + true_time_subtraction) as u64,
-            );
+            previous_subtractions += true_time_ps_subtraction;
+
+            let true_ps = lap_time.igt_to_millis() as i64 * 1e+9 as i64 + true_time_ps_subtraction;
+            let true_sec = (true_ps / 1e+12 as i64) as u8;
+            let true_fractional_sec = true_ps % 1e+12 as i64;
+
+            *exact_lap_time = if true_ps > 0 {
+                ExactFinishTime::new(true_sec / 60, true_sec % 60, true_fractional_sec as u64)
+            } else {
+                ExactFinishTime::default()
+            };
+
             in_game_time_offset += 0x03;
             current_offset += 0x04;
         }

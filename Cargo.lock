@@ -193,7 +193,7 @@ dependencies = [
 
 [[package]]
 name = "rkg-utils"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "chrono",
  "sha1",
