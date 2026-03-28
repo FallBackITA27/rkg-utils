@@ -12,19 +12,7 @@ use crate::{
         in_game_time::InGameTime,
         location::{Location, constants::*},
         mii::{
-            birthday::Birthday,
-            build::Build,
-            eyebrows::{EyebrowType, Eyebrows},
-            eyes::{EyeColor, EyeType, Eyes},
-            facial_hair::{BeardType, FacialHair, MustacheType},
-            favorite_color::FavoriteColor,
-            glasses::{Glasses, GlassesColor, GlassesType},
-            hair::{Hair, HairColor, HairType},
-            head::{FaceFeatures, Head, HeadShape, SkinTone},
-            lips::{Lips, LipsColor, LipsType},
-            mii_type::MiiType,
-            mole::Mole,
-            nose::{Nose, NoseType},
+            Mii, birthday::Birthday, build::Build, eyebrows::{EyebrowType, Eyebrows}, eyes::{EyeColor, EyeType, Eyes}, facial_hair::{BeardType, FacialHair, MustacheType}, favorite_color::FavoriteColor, glasses::{Glasses, GlassesColor, GlassesType}, hair::{Hair, HairColor, HairType}, head::{FaceFeatures, Head, HeadShape, SkinTone}, lips::{Lips, LipsColor, LipsType}, mii_type::MiiType, mole::Mole, nose::{Nose, NoseType}
         },
         slot_id::SlotId,
     },
@@ -1032,4 +1020,9 @@ fn test_sp_footer() {
 fn south_korea_ghost_test() {
     let ghost = Ghost::new_from_file("./test_ghosts/ghost2_comp_00.rkg").unwrap();
     assert_eq!(ghost.header().location().country(), Country::SouthKorea);
+}
+
+#[test]
+fn mii_file_test() {
+    let _ = Mii::new_from_file("./test_ghosts/4TBMrBean.miigx").unwrap();
 }

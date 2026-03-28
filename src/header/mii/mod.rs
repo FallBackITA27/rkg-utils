@@ -243,10 +243,10 @@ impl Mii {
     /// `0x4A` usable bytes. Returns [`MiiError::IOError`] for file I/O
     /// failures, and other [`MiiError`] variants if any field fails to parse.
     pub fn new_from_file<T: AsRef<std::path::Path>>(path: T) -> Result<Self, MiiError> {
-        let mut data = Vec::with_capacity(0x4A);
-        std::fs::File::open(&path)?.read_exact(&mut data)?;
+        let mut data = Vec::new();
+        std::fs::File::open(&path)?.read_to_end(&mut data)?;
 
-        if data[..4] == *b"RKGD" {
+        if data.len() >= 4 && data[..4] == *b"RKGD" {
             // Mii data starts at offset 0x3C in an RKG file
             data = Vec::from(&data[0x3C..]);
         }
