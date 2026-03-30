@@ -246,7 +246,7 @@ impl Mii {
         let mut data = Vec::new();
         std::fs::File::open(&path)?.read_to_end(&mut data)?;
 
-        if data.len() >= 4 && data[..4] == *b"RKGD" {
+        if data.len() >= 0x3C && data[..4] == *b"RKGD" {
             // Mii data starts at offset 0x3C in an RKG file
             data = Vec::from(&data[0x3C..]);
         }
