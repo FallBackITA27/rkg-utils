@@ -1,4 +1,5 @@
 use crate::byte_handler::FromByteHandler;
+use crate::footer::ctgp_footer::region::Region;
 use crate::footer::ctgp_footer::{
     category::Category, ctgp_version::CTGPVersion, exact_finish_time::ExactFinishTime,
 };
@@ -11,6 +12,7 @@ use std::fmt::Write;
 pub mod category;
 pub mod ctgp_version;
 pub mod exact_finish_time;
+pub mod region;
 
 /// Errors that can occur while parsing a [`CTGPFooter`].
 #[derive(thiserror::Error, Debug)]
@@ -70,6 +72,8 @@ pub struct CTGPFooter {
     /// Per-lap flags indicating whether CTGP detected a suspicious split-line intersection.
     /// `None` for footer versions below 2.
     lap_split_suspicious_intersections: Option<[bool; 10]>,
+    /// The region of the disc used when the ghost was created.
+    disc_region: Option<Region>,
     /// Sub-millisecond-accurate lap times, one per recorded lap.
     exact_lap_times: [ExactFinishTime; 10],
     /// Real-time clock timestamp recorded when the race ended.
@@ -208,6 +212,7 @@ impl CTGPFooter {
         let possible_ctgp_versions;
         let core_version;
         let mut lap_split_suspicious_intersections = Some([false; 10]);
+        let disc_region;
 
         if footer_version >= 2 {
             let version_bytes = &metadata[current_offset..current_offset + 0x04];
@@ -223,6 +228,13 @@ impl CTGPFooter {
                     *intersection = laps_handler.read_bool(index as u8 + 6);
                 }
             }
+
+            if footer_version >= 3 {
+                disc_region = Some(Region::from(metadata[current_offset + 3]));
+            } else {
+                disc_region = None;
+            }
+
             current_offset -= 0x04;
         } else {
             // Infer that the core version is 1.03.0134, since the next batch of updates after TT release was CORE 1.03.0136
@@ -230,6 +242,7 @@ impl CTGPFooter {
             // Metadata version 2 was introduced in between the 1.03.1044 and 1046 update, so it must be 1.03.1044
             possible_ctgp_versions = Some(Vec::from([CTGPVersion::new(1, 3, 1044, None)]));
             lap_split_suspicious_intersections = None;
+            disc_region = None;
         }
 
         current_offset += 0x3C;
@@ -373,6 +386,7 @@ impl CTGPFooter {
             core_version,
             possible_ctgp_versions,
             lap_split_suspicious_intersections,
+            disc_region,
             exact_lap_times,
             rtc_race_end,
             rtc_race_begins,
@@ -455,14 +469,23 @@ impl CTGPFooter {
     /// Returns `None` for ghosts recorded on footer version 1, which does not include this data.
     pub fn lap_split_suspicious_intersections(&self) -> Option<&[bool]> {
         if let Some(intersections) = &self.lap_split_suspicious_intersections {
-            return Some(&intersections[0..self.lap_count as usize]);
+            let lap_count = std::cmp::min(intersections.len(), self.lap_count as usize);
+            return Some(&intersections[0..lap_count]);
         }
         None
     }
 
+    /// Returns the region of the disc used when the ghost was set.
+    /// 
+    /// Returns `None` for ghosts recorded on footer version 1 or 2, which do not include this data.
+    pub fn disc_region(&self) -> Option<Region> {
+        self.disc_region
+    }
+
     /// Returns the sub-millisecond-accurate lap times for all recorded laps.
     pub fn exact_lap_times(&self) -> &[ExactFinishTime] {
-        &self.exact_lap_times[0..self.lap_count as usize]
+        let lap_count = std::cmp::min(self.exact_lap_times.len(), self.lap_count as usize);
+        &self.exact_lap_times[0..lap_count]
     }
 
     /// Returns the sub-millisecond-accurate time for a single lap by index.
@@ -472,7 +495,7 @@ impl CTGPFooter {
     /// Returns [`CTGPFooterError::LapSplitIndexError`] if `idx` is greater than or equal to
     /// the number of recorded laps.
     pub fn exact_lap_time(&self, idx: usize) -> Result<ExactFinishTime, CTGPFooterError> {
-        if idx >= self.lap_count as usize {
+        if idx >= self.lap_count as usize || idx >= self.exact_lap_times.len() {
             return Err(CTGPFooterError::LapSplitIndexError);
         }
         Ok(self.exact_lap_times[idx])
@@ -520,7 +543,8 @@ impl CTGPFooter {
 
     /// Returns the per-lap mushroom usage counts (shroomstrat) for the recorded laps.
     pub fn shroomstrat(&self) -> &[u8] {
-        &self.shroomstrat[0..self.lap_count as usize]
+        let lap_count = std::cmp::min(self.shroomstrat.len(), self.lap_count as usize);
+        &self.shroomstrat[0..lap_count]
     }
 
     /// Returns a dash-separated string representation of the per-lap mushroom usage counts.

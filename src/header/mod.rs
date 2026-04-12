@@ -388,7 +388,8 @@ impl Header {
 
     /// Returns a slice of the valid lap split times (length equal to [`lap_count`](Header::lap_count)).
     pub fn lap_split_times(&self) -> &[InGameTime] {
-        &self.lap_split_times[0..self.lap_count as usize]
+        let lap_count = std::cmp::min(self.lap_split_times.len(), self.lap_count as usize);
+        &self.lap_split_times[0..lap_count]
     }
 
     /// Returns the lap split time at the given zero-based idx.
@@ -398,7 +399,7 @@ impl Header {
     /// Returns [`HeaderError::LapSplitIndexError`] if `idx` is greater than or
     /// equal to [`lap_count`](Header::lap_count).
     pub fn lap_split_time(&self, idx: usize) -> Result<InGameTime, HeaderError> {
-        if idx >= self.lap_count as usize {
+        if idx >= self.lap_count as usize || idx >= self.lap_split_times.len() {
             return Err(HeaderError::LapSplitIndexError);
         }
         Ok(self.lap_split_times[idx])

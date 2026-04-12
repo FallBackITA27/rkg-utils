@@ -2,7 +2,7 @@ use chrono::NaiveDateTime;
 
 use crate::{
     Ghost,
-    footer::{FooterType, ctgp_footer::CTGPFooter},
+    footer::{FooterType, ctgp_footer::{CTGPFooter, region::Region}},
     header::{
         Header,
         combo::{Combo, character::Character, vehicle::Vehicle},
@@ -12,7 +12,20 @@ use crate::{
         in_game_time::InGameTime,
         location::{Location, constants::*},
         mii::{
-            Mii, birthday::Birthday, build::Build, eyebrows::{EyebrowType, Eyebrows}, eyes::{EyeColor, EyeType, Eyes}, facial_hair::{BeardType, FacialHair, MustacheType}, favorite_color::FavoriteColor, glasses::{Glasses, GlassesColor, GlassesType}, hair::{Hair, HairColor, HairType}, head::{FaceFeatures, Head, HeadShape, SkinTone}, lips::{Lips, LipsColor, LipsType}, mii_type::MiiType, mole::Mole, nose::{Nose, NoseType}
+            Mii,
+            birthday::Birthday,
+            build::Build,
+            eyebrows::{EyebrowType, Eyebrows},
+            eyes::{EyeColor, EyeType, Eyes},
+            facial_hair::{BeardType, FacialHair, MustacheType},
+            favorite_color::FavoriteColor,
+            glasses::{Glasses, GlassesColor, GlassesType},
+            hair::{Hair, HairColor, HairType},
+            head::{FaceFeatures, Head, HeadShape, SkinTone},
+            lips::{Lips, LipsColor, LipsType},
+            mii_type::MiiType,
+            mole::Mole,
+            nose::{Nose, NoseType},
         },
         slot_id::SlotId,
     },
@@ -214,8 +227,8 @@ fn test_ctgp_metadata() {
 #[test]
 fn print_ctgp_metadata() {
     let mut rkg_data: Vec<u8> = Vec::new();
-    std::fs::File::open("./test_ghosts/0m00s000.rkg")
-        .expect("Couldn't find `./test_ghosts/0m00s000.rkg`")
+    std::fs::File::open("./test_ghosts/00m58s6479888 David .rkg")
+        .expect("Couldn't find `./test_ghosts/00m58s6479888 David .rkg`")
         .read_to_end(&mut rkg_data)
         .expect("Couldn't read bytes in file");
 
@@ -275,6 +288,9 @@ fn print_ctgp_metadata() {
     println!(
         "USB Gamecube enabled? {}",
         ctgp_metadata.usb_gamecube_enabled()
+    );
+    println!("Disc region: {:#?}",
+      ctgp_metadata.disc_region().unwrap_or(Region::Unknown)  
     );
     println!(
         "Final lap dubious intersection? {}",
