@@ -21,6 +21,12 @@ pub struct Input {
     frame_duration: u32,
 }
 
+impl Default for Input {
+    fn default() -> Self {
+        Self { face_buttons: Default::default(), stick_x: Default::default(), stick_y: Default::default(), dpad_button: DPadButton::None, frame_duration: Default::default() }
+    }
+}
+
 impl Input {
     /// Creates a new [`Input`] from its individual components.
     pub fn new(

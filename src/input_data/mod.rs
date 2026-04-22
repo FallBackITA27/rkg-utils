@@ -153,6 +153,85 @@ impl InputData {
         })
     }
 
+    /// Returns an input state at a specified frame in the race.
+    ///
+    /// Returns `None` if the frame is 0 or otherwise out-of-range.
+    pub fn get_input_at_frame(&self, frame: u32) -> Option<Input> {
+        if frame == 0 {
+            return None;
+        }
+
+        let mut face_idx = 0;
+        let mut stick_idx = 0;
+        let mut dpad_idx = 0;
+        let mut face_offset = 0u32;
+        let mut stick_offset = 0u32;
+        let mut dpad_offset = 0u32;
+        let mut frames_so_far = 0u32;
+
+        while face_idx < self.face_inputs.len()
+            || stick_idx < self.stick_inputs.len()
+            || dpad_idx < self.dpad_inputs.len()
+        {
+            let face = self.face_inputs.get(face_idx);
+            let stick = self.stick_inputs.get(stick_idx);
+            let dpad = self.dpad_inputs.get(dpad_idx);
+
+            let face_remaining = face
+                .map(|f| f.frame_duration() - face_offset)
+                .unwrap_or(u32::MAX);
+            let stick_remaining = stick
+                .map(|s| s.frame_duration() - stick_offset)
+                .unwrap_or(u32::MAX);
+            let dpad_remaining = dpad
+                .map(|d| d.frame_duration() - dpad_offset)
+                .unwrap_or(u32::MAX);
+
+            let duration = face_remaining.min(stick_remaining).min(dpad_remaining);
+
+            if duration == u32::MAX {
+                break;
+            }
+
+            frames_so_far += duration;
+
+            if frame <= frames_so_far {
+                return Some(Input::new(
+                    face.map(|f| f.buttons().clone()).unwrap_or_default(),
+                    stick.map(|s| s.x()).unwrap_or(0),
+                    stick.map(|s| s.y()).unwrap_or(0),
+                    dpad.map(|d| d.button()).unwrap_or(DPadButton::None),
+                    duration,
+                ));
+            }
+
+            face_offset += duration;
+            stick_offset += duration;
+            dpad_offset += duration;
+
+            if let Some(face) = face
+                && face_offset >= face.frame_duration()
+            {
+                face_idx += 1;
+                face_offset = 0;
+            }
+            if let Some(stick) = stick
+                && stick_offset >= stick.frame_duration()
+            {
+                stick_idx += 1;
+                stick_offset = 0;
+            }
+            if let Some(dpad) = dpad
+                && dpad_offset >= dpad.frame_duration()
+            {
+                dpad_idx += 1;
+                dpad_offset = 0;
+            }
+        }
+
+        None
+    }
+
     /// Returns the three input streams merged into a single frame-accurate sequence of [`Input`] values.
     ///
     /// The face, stick, and D-pad streams are interleaved by advancing through

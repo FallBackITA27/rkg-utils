@@ -1042,3 +1042,12 @@ fn south_korea_ghost_test() {
 fn mii_file_test() {
     let _ = Mii::new_from_file("./test_ghosts/4TBMrBean.miigx").unwrap();
 }
+
+#[test]
+fn input_at_frame_test() {
+    let ghost = Ghost::new_from_file("./test_ghosts/JC_LC_Compressed.rkg").unwrap();
+
+    let frame = 256;
+    println!("Input at frame {}:", frame);
+    println!("{:#?}", ghost.input_data().get_input_at_frame(frame))
+}
