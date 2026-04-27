@@ -31,6 +31,7 @@ pub mod crc;
 pub mod footer;
 pub mod header;
 pub mod input_data;
+pub mod rksys;
 
 #[cfg(test)]
 mod tests;
