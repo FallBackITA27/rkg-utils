@@ -1,5 +1,9 @@
 use std::string::FromUtf16Error;
 
+use crate::rksys::license::unlocks::Unlocks;
+
+pub mod unlocks;
+
 /// Errors that can occur while constructing a [`License`].
 #[derive(thiserror::Error, Debug)]
 pub enum LicenseError {
@@ -13,8 +17,8 @@ pub struct License {
     mii_name: String,
     mii_id: u32,
     mii_client: u32,
-
-    /* 
+    unlocks: Unlocks,
+    /*
     personal_best_ghost_flags: [bool; 32],
     downloaded_ghost_flags: [bool; 32],
     normal_staff_ghost_flags: [bool; 32],
@@ -30,9 +34,16 @@ impl TryFrom<[u8; 0x88C0]> for License {
         }
 
         Ok(License {
-            mii_name: String::from_utf16(unsafe { std::mem::transmute::<&[u8], &[u16]>(&value[0x14..0x28]) })?,
+            mii_name: String::from_utf16(unsafe {
+                std::mem::transmute::<&[u8], &[u16]>(&value[0x14..0x28])
+            })?,
             mii_id: u32::from_be_bytes(unsafe { value[0x28..0x2C].try_into().unwrap_unchecked() }),
-            mii_client: u32::from_be_bytes(unsafe { value[0x2C..0x30].try_into().unwrap_unchecked() })
+            mii_client: u32::from_be_bytes(unsafe {
+                value[0x2C..0x30].try_into().unwrap_unchecked()
+            }),
+            unlocks: Unlocks::from(unsafe {
+                TryInto::<[u8; 8]>::try_into(&value[0x30..0x38]).unwrap_unchecked()
+            }),
         })
     }
 }
@@ -48,5 +59,9 @@ impl License {
 
     pub const fn mii_client(&self) -> u32 {
         self.mii_client
+    }
+
+    pub const fn unlocks(&self) -> &Unlocks {
+        &self.unlocks
     }
 }
