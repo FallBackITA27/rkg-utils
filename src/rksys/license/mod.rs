@@ -1,7 +1,8 @@
 use std::string::FromUtf16Error;
 
-use crate::rksys::license::unlocks::Unlocks;
+use crate::rksys::license::{dwc::DWCUserData, unlocks::Unlocks};
 
+pub mod dwc;
 pub mod unlocks;
 
 /// Errors that can occur while constructing a [`License`].
@@ -18,6 +19,7 @@ pub struct License {
     mii_id: u32,
     mii_client: u32,
     unlocks: Unlocks,
+    dwc: DWCUserData,
     /*
     personal_best_ghost_flags: [bool; 32],
     downloaded_ghost_flags: [bool; 32],
@@ -44,6 +46,9 @@ impl TryFrom<[u8; 0x88C0]> for License {
             unlocks: Unlocks::from(unsafe {
                 TryInto::<[u8; 8]>::try_into(&value[0x30..0x38]).unwrap_unchecked()
             }),
+            dwc: DWCUserData::from(unsafe {
+                TryInto::<[u8; 0x40]>::try_into(&value[0x40..0x80]).unwrap_unchecked()
+            }),
         })
     }
 }
@@ -63,5 +68,9 @@ impl License {
 
     pub const fn unlocks(&self) -> &Unlocks {
         &self.unlocks
+    }
+
+    pub const fn dwc(&self) -> &DWCUserData {
+        &self.dwc
     }
 }
