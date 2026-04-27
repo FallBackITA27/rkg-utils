@@ -1,8 +1,6 @@
-use crate::{
-    rksys::{
-        ghost_slots::{GhostSlots, GhostSlotsError},
-        license::{License, LicenseError},
-    },
+use crate::rksys::{
+    ghost_slots::{GhostSlots, GhostSlotsError},
+    license::{License, LicenseError},
 };
 
 pub mod ghost_slots;
