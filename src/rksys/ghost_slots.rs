@@ -36,29 +36,27 @@ impl TryFrom<[u8; 0xA5000]> for GhostSlots {
 
 impl GhostSlots {
     pub const fn get_nth_pb_ghost(&self, idx: u8) -> Option<&Ghost> {
-        let idx = idx as usize;
         if idx > 32 {
             return None;
         }
 
-        self.0[idx].as_ref()
+        self.get_nth_ghost_slot(idx)
     }
 
     pub const fn get_nth_downloaded_ghost(&self, idx: u8) -> Option<&Ghost> {
-        let idx = idx as usize;
         if idx > 32 {
             return None;
         }
 
-        self.0[idx + 32].as_ref()
+        self.get_nth_ghost_slot(idx + 32)
     }
 
     pub const fn get_ghost_race_ghost(&self) -> Option<&Ghost> {
-        self.0[64].as_ref()
+        self.get_nth_ghost_slot(64)
     }
 
     pub const fn get_competition_ghost(&self) -> Option<&Ghost> {
-        self.0[65].as_ref()
+        self.get_nth_ghost_slot(65)
     }
 
     pub const fn get_nth_ghost_slot(&self, idx: u8) -> Option<&Ghost> {
